@@ -21,7 +21,7 @@
 
 ## Features
 
-- **GitHub-flavoured rendering** — tables, task lists, strikethrough, footnote-free CommonMark, autolinked URLs, clickable tables of contents, local and remote images, raw HTML.
+- **GitHub-flavoured rendering** — CommonMark plus tables, task lists, strikethrough, autolinked URLs, clickable tables of contents, local and remote images, raw HTML.
 - **Code & diagrams** — syntax highlighting (highlight.js) and Mermaid diagrams, loaded only when a document uses them.
 - **Preview.app-style window** — outline sidebar, Liquid Glass toolbar with zoom, raw-source toggle, file info inspector, Share, and search with match count and highlighting.
 - **Live reload** — edit the file in any editor, save, and the preview updates in place without losing your scroll position.
