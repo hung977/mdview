@@ -1,53 +1,105 @@
-# mdview
+<p align="center">
+  <img src="docs/images/icon.png" width="128" alt="mdview icon">
+</p>
 
-A tiny native macOS viewer for `.md` / `.markdown` files. Double-click a Markdown file, see it rendered. Live-reloads when the file changes on disk.
+<h1 align="center">mdview</h1>
+
+<p align="center">
+  A small, native macOS viewer for Markdown files — open, read, done.<br>
+  Renders like GitHub, looks like Preview.app, reloads when the file changes.
+</p>
+
+<p align="center">
+  <a href="https://github.com/hung977/mdview/releases/latest"><img src="https://img.shields.io/github/v/release/hung977/mdview?label=download" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/macOS-15%2B-blue" alt="macOS 15+">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
+</p>
+
+<p align="center">
+  <img src="docs/images/screenshot.png" width="900" alt="mdview showing a Markdown file with the outline sidebar open">
+</p>
+
+## Features
+
+- **GitHub-flavoured rendering** — tables, task lists, strikethrough, footnote-free CommonMark, autolinked URLs, clickable tables of contents, local and remote images, raw HTML.
+- **Code & diagrams** — syntax highlighting (highlight.js) and Mermaid diagrams, loaded only when a document uses them.
+- **Preview.app-style window** — outline sidebar, Liquid Glass toolbar with zoom, raw-source toggle, file info inspector, Share, and search with match count and highlighting.
+- **Live reload** — edit the file in any editor, save, and the preview updates in place without losing your scroll position.
+- **Quick Look** — select a `.md` file in Finder and press Space.
+- **Native** — light/dark mode, text selection and copy, links open in your browser, document tabs, Open Recent, drag & drop onto the window or Dock icon.
+- **Offline & self-contained** — every renderer dependency is bundled; the app makes no network requests except to load remote images you reference.
 
 ## Install
 
-Download `mdview-<version>.zip` from the [Releases](https://github.com/hung977/mdview/releases) page, unzip, and move `mdview.app` to `/Applications`. The build is ad-hoc signed (not notarized), so the first launch needs one of:
+1. Download `mdview-<version>.zip` from the [latest release](https://github.com/hung977/mdview/releases/latest).
+2. Unzip and move `mdview.app` to `/Applications`.
+3. The app is signed ad hoc (not notarized), so allow it once:
 
-    xattr -dr com.apple.quarantine /Applications/mdview.app
+   ```sh
+   xattr -dr com.apple.quarantine /Applications/mdview.app
+   ```
 
-or right-click → Open. Launch it once so macOS registers the Quick Look extension.
+   or right-click the app → **Open**.
+4. Launch it once so macOS registers the file association and the Quick Look extension.
 
-## Build
+To make it the default for Markdown files: right-click any `.md` file → **Get Info** → *Open with* → mdview → **Change All…**
 
-Open `mdview.xcodeproj` in Xcode 26 and run, or use the Makefile:
+## Usage
 
-    make            # Debug build
-    make test       # unit tests
-    make release    # Release build → dist/mdview.app + dist/mdview-<version>.zip
-    make install    # copy the Release build to /Applications and register Quick Look
+| Action | How |
+|---|---|
+| Open a file | double-click in Finder, drag onto the window or Dock icon, `File ▸ Open…`, or `open -a mdview README.md` |
+| Quick Look | select a `.md` file in Finder and press **Space** |
+| Outline | toolbar sidebar button; click a heading to jump to it |
+| Find | **⌘F** to focus search, **⌘G** / **⇧⌘G** next / previous, **Enter** in the field for next |
+| Zoom | **⌘+** / **⌘−** / **⌘0** (or the toolbar buttons; the middle one shows the current level) |
+| Raw source | toolbar toggle — shows the Markdown as written, outline still works |
+| File info | toolbar **ⓘ** — name, location, size, dates, words, characters, lines, headings, links, images, tables, code blocks, diagrams |
 
-The project file is generated from `project.yml` with [xcodegen](https://github.com/yonaskolb/XcodeGen) (`xcodegen generate`); regenerate it if you add files.
+Supported extensions: `.md`, `.markdown`.
 
-## Use
+## Build from source
 
-- Double-click a `.md` file in Finder (choose mdview under *Open With* the first time), or
-- select a `.md` file in Finder and press **Space** — the bundled Quick Look extension renders it (launch the app once so macOS registers the extension), or
-- `open -a mdview README.md`, or
-- drag a file onto the window or Dock icon, or `File → Open…`.
+Requirements: macOS 15+, Xcode 26, [xcodegen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`) — the `.xcodeproj` is generated from `project.yml`.
 
-The sidebar lists the document's headings (click to jump). The toolbar has zoom (⌘+ / ⌘− / ⌘0), a raw-source toggle, file info, Share, and Search (⌘F, ⌘G / ⇧⌘G for next / previous). Text is selectable and copyable, links open in your browser, dark mode follows the system.
+```sh
+git clone https://github.com/hung977/mdview.git
+cd mdview
+make            # Debug build (generates the Xcode project if needed)
+make test       # unit tests
+make release    # Release build → dist/mdview.app and dist/mdview-<version>.zip
+make install    # copy the Release build to /Applications and register Quick Look
+```
 
-Rendering matches GitHub: tables, task lists, syntax-highlighted code, Mermaid diagrams, autolinked URLs, clickable tables of contents, local and remote images.
+Or open `mdview.xcodeproj` in Xcode after `xcodegen generate`.
 
-Requires macOS 15 (Liquid Glass toolbar groups on macOS 26). No Swift package dependencies; the renderer is a bundled web page using [markdown-it](https://github.com/markdown-it/markdown-it), [highlight.js](https://highlightjs.org), [mermaid](https://mermaid.js.org) and [github-markdown-css](https://github.com/sindresorhus/github-markdown-css) (all vendored under `MarkdownPreview/Resources/vendor`, no network access needed).
+## How it works
 
-## Layout
+The app is a SwiftUI `DocumentGroup(viewing:)` shell around a single `WKWebView`. The web view hosts a bundled page that renders Markdown with [markdown-it](https://github.com/markdown-it/markdown-it) (GFM: tables, strikethrough, linkify, plus small custom rules for task lists and GitHub-style heading ids), highlights code with [highlight.js](https://highlightjs.org), draws diagrams with [mermaid](https://mermaid.js.org), and styles everything with [github-markdown-css](https://github.com/sindresorhus/github-markdown-css). Re-renders replace the document body in place, so live reload keeps the scroll position; search uses the CSS Custom Highlight API so it never touches the selection.
 
-    mdview/
-    ├── MDViewApp.swift            DocumentGroup(viewing:) + Find menu
-    ├── ContentView.swift          NavigationSplitView (outline sidebar + viewer), Preview-style toolbar, drop target
-    ├── Viewer.swift               ViewerWebView (WKWebView) + Page — shared with the Quick Look extension
-    ├── Document.swift             FileDocument + FileWatcher (live reload)
-    ├── Resources/
-    │   ├── viewer.html/.css/.js   the page: markdown-it setup, task lists, heading ids, find/highlight, raw mode
-    │   └── vendor/                markdown-it, highlight.js, mermaid, github-markdown-css
-    ├── Assets.xcassets            app icon
-    └── Sample.md                  element gallery for manual testing
-    mdviewQuickLook/               Quick Look preview extension (sandboxed; reuses Viewer.swift + Resources)
+A `DispatchSource` watches the open file (including atomic saves that replace the inode). The Quick Look extension reuses the same web view and page, sandboxed. HTML embedded in a document is rendered but cannot run scripts (CSP with a per-process nonce).
+
+```
+mdview/
+├── MDViewApp.swift         DocumentGroup, Find / View menu commands
+├── ContentView.swift       NavigationSplitView (outline + viewer), toolbar, info inspector, drop target
+├── Viewer.swift            ViewerWebView (WKWebView) + Page — shared with the Quick Look extension
+├── Document.swift          FileDocument + FileWatcher (live reload)
+├── Resources/
+│   ├── viewer.html/.css/.js   the page: markdown-it setup, outline, find/highlight, raw mode
+│   └── vendor/                markdown-it, highlight.js, mermaid, github-markdown-css
+└── Assets.xcassets         app icon
+mdviewQuickLook/            Quick Look preview extension
+mdviewTests/                XCTest: rendering via the real page (DOM and pixel checks), file watcher
+```
+
+## Known limitations
+
+- Not notarized — first launch needs the `xattr` step above.
+- Quick Look previews run in a sandbox that cannot read files next to the document, so local images show their alt text there (they display normally in the app).
+- Search matches text within a single text node; a phrase spanning bold/italic boundaries is not matched.
+- Liquid Glass toolbar groups need macOS 26; on macOS 15 the same items appear in a standard toolbar.
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Bundled third-party code keeps its own MIT licenses: markdown-it, highlight.js, mermaid, github-markdown-css.
+[MIT](LICENSE). Bundled third-party code is also MIT-licensed: markdown-it, highlight.js, mermaid, github-markdown-css.
