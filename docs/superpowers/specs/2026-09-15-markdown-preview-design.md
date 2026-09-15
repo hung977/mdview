@@ -10,6 +10,7 @@ Priority: simplicity > reliability > native feel > features.
 - **Only dependency:** `apple/swift-markdown` via SPM (pulls `swift-cmark`).
 - **Target:** macOS 14+, Swift 5, SwiftUI app shell, AppKit text view.
 - **TextKit 1** explicitly. `NSTextTable`/`NSTextBlock` are not supported by TextKit 2, so the text view is created on an explicit `NSTextStorage → NSLayoutManager → NSTextContainer` stack.
+- **No App Sandbox:** the sandbox would block reading images stored next to the opened file (a required feature). Ad-hoc signing, hardened runtime.
 - **Project generation:** `project.yml` for `xcodegen`; the generated `MarkdownPreview.xcodeproj` is committed so the project opens and builds immediately.
 
 ## Layout
@@ -24,7 +25,6 @@ MarkdownPreview/
 │   ├── ContentView.swift                NSViewRepresentable around NSScrollView/NSTextView, drop target
 │   ├── MarkdownRenderer.swift           MarkupVisitor → NSAttributedString, tiny highlighter
 │   ├── Info.plist                       CFBundleDocumentTypes for .md/.markdown (Viewer)
-│   ├── MarkdownPreview.entitlements     sandbox + user-selected files read-only
 │   └── Sample.md                        element gallery for manual testing (not bundled)
 └── MarkdownPreviewTests/
     └── MarkdownRendererTests.swift
