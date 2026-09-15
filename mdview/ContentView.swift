@@ -16,6 +16,7 @@ struct ContentView: View {
     @FocusState private var searchFocused: Bool
     @State private var findStatus = ""
     @State private var zoom: CGFloat = 1
+    @State private var sidebar: NavigationSplitViewVisibility = .detailOnly   // collapsed until the user opens it
 
     init(document: MarkdownDocument, fileURL: URL?) {
         self.document = document
@@ -24,7 +25,7 @@ struct ContentView: View {
     }
 
     var body: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $sidebar) {
             List(outline, selection: $selectedHeading) { heading in
                 Text(heading.text)
                     .lineLimit(1)
