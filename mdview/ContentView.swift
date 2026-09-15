@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var query = ""
     @FocusState private var searchFocused: Bool
     @State private var findStatus = ""
+    @State private var zoom: CGFloat = 1
 
     init(document: MarkdownDocument, fileURL: URL?) {
         self.document = document
@@ -41,7 +42,8 @@ struct ContentView: View {
         } detail: {
             MarkdownWebView(text: text, baseURL: fileURL?.deletingLastPathComponent(), showRaw: showRaw,
                             scrollRequest: scrollRequest, query: query,
-                            onOutline: { outline = $0 }, onFindStatus: { findStatus = $0 })
+                            onOutline: { outline = $0 }, onFindStatus: { findStatus = $0 },
+                            onZoomChange: { zoom = $0 })
                 .ignoresSafeArea(.container, edges: .top)   // page scrolls under the glass toolbar
                 .toolbar { toolbarItems }
                 .searchable(text: $query, placement: .toolbar, prompt: "Search")
@@ -75,7 +77,10 @@ struct ContentView: View {
     private var toolbarItems: some ToolbarContent {
         ToolbarItemGroup {
             Button { ViewerView.inKeyWindow()?.zoomOut(nil) } label: { Label("Zoom Out", systemImage: "minus.magnifyingglass") }
-            Button { ViewerView.inKeyWindow()?.actualSize(nil) } label: { Label("Actual Size", systemImage: "1.magnifyingglass") }
+            Button { ViewerView.inKeyWindow()?.actualSize(nil) } label: {
+                Text("\(Int((zoom * 100).rounded()))%").monospacedDigit().frame(minWidth: 40)
+            }
+            .help("Actual Size")
             Button { ViewerView.inKeyWindow()?.zoomIn(nil) } label: { Label("Zoom In", systemImage: "plus.magnifyingglass") }
         }
         if #available(macOS 26, *) { ToolbarSpacer(.fixed) }
@@ -87,7 +92,7 @@ struct ContentView: View {
         if !query.isEmpty {
             if #available(macOS 26, *) { ToolbarSpacer(.fixed) }
             ToolbarItemGroup {
-                Text(findStatus).foregroundStyle(.secondary).monospacedDigit()
+                Text(findStatus).foregroundStyle(.secondary).monospacedDigit().padding(.leading, 8)
                 Button { ViewerView.inKeyWindow()?.findPrevious(nil) } label: { Label("Previous Match", systemImage: "chevron.up") }
                 Button { ViewerView.inKeyWindow()?.findNext(nil) } label: { Label("Next Match", systemImage: "chevron.down") }
             }
@@ -169,6 +174,7 @@ struct MarkdownWebView: NSViewRepresentable {
     let query: String
     let onOutline: ([Heading]) -> Void
     let onFindStatus: (String) -> Void
+    let onZoomChange: (CGFloat) -> Void
 
     final class Coordinator {
         var lastText: String?
@@ -185,8 +191,9 @@ struct MarkdownWebView: NSViewRepresentable {
 
     func updateNSView(_ viewer: ViewerView, context: Context) {
         let coordinator = context.coordinator
-        let onFindStatus = onFindStatus
+        let onFindStatus = onFindStatus, onZoomChange = onZoomChange
         viewer.onFindStatus = { status in DispatchQueue.main.async { onFindStatus(status) } }
+        viewer.onZoomChange = { zoom in DispatchQueue.main.async { onZoomChange(zoom) } }
         if coordinator.lastShowRaw != showRaw {
             coordinator.lastShowRaw = showRaw
             viewer.webView.setMode(raw: showRaw)
@@ -214,6 +221,7 @@ struct MarkdownWebView: NSViewRepresentable {
 final class ViewerView: NSView {
     let webView: ViewerWebView
     var onFindStatus: ((String) -> Void)?
+    var onZoomChange: ((CGFloat) -> Void)?
     private var lastInset: CGFloat = -1
 
     init(baseURL: URL?) {
@@ -274,7 +282,12 @@ final class ViewerView: NSView {
 
     // MARK: Zoom
 
-    @objc func zoomIn(_ sender: Any?) { webView.zoom *= 1.1 }
-    @objc func zoomOut(_ sender: Any?) { webView.zoom /= 1.1 }
-    @objc func actualSize(_ sender: Any?) { webView.zoom = 1 }
+    @objc func zoomIn(_ sender: Any?) { setZoom(webView.zoom * 1.1) }
+    @objc func zoomOut(_ sender: Any?) { setZoom(webView.zoom / 1.1) }
+    @objc func actualSize(_ sender: Any?) { setZoom(1) }
+
+    private func setZoom(_ value: CGFloat) {
+        webView.zoom = value
+        onZoomChange?(webView.zoom)
+    }
 }
