@@ -11,36 +11,16 @@ html, body { margin: 0; padding: 0; background: #ffffff; }
 @media (max-width: 767px) { .markdown-body { padding: 16px; } }
 
 .markdown-body input[type="checkbox"] { vertical-align: middle; }
+
+/* Raw source view: plain wrapped monospace, no code-block chrome. */
+.markdown-body.raw pre.raw-source,
+.markdown-body.raw pre.raw-source code {
+  background: transparent; padding: 0; margin: 0;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  font-size: 13px; line-height: 1.5;
+}
 .markdown-body pre.mermaid { background: transparent; text-align: center; }
 .markdown-body pre.mermaid svg { max-width: 100%; height: auto; }
-
-/* Find bar — sits above the content like a native find bar. */
-#findbar {
-  position: sticky; top: 0; z-index: 10;
-  display: flex; align-items: center; gap: 6px;
-  padding: 6px 10px;
-  font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  background: #f6f8fa; color: #1f2328; border-bottom: 1px solid #d0d7de;
-}
-#findbar[hidden] { display: none; }
-#findinput {
-  flex: 1; max-width: 360px; padding: 3px 8px;
-  font: inherit; border: 1px solid #d0d7de; border-radius: 6px; outline: none;
-  background: #ffffff; color: inherit;
-}
-#findinput:focus { border-color: #0969da; box-shadow: 0 0 0 2px rgba(9,105,218,.25); }
-#findcount { min-width: 5em; color: #656d76; }
-#findbar button {
-  font: inherit; padding: 2px 9px; border: 1px solid #d0d7de; border-radius: 6px;
-  background: #ffffff; color: inherit; cursor: default;
-}
-#findbar button:active { background: #eaeef2; }
-@media (prefers-color-scheme: dark) {
-  #findbar { background: #161b22; color: #e6edf3; border-color: #30363d; }
-  #findinput, #findbar button { background: #0d1117; border-color: #30363d; }
-  #findbar button:active { background: #21262d; }
-  #findcount { color: #8d96a0; }
-}
 
 /* github-markdown-css already pads <pre>; highlight.js must not pad again. */
 .markdown-body pre code.hljs { padding: 0; background: transparent; }

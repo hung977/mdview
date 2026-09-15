@@ -16,7 +16,7 @@ The project file is generated from `project.yml` with [xcodegen](https://github.
 - `open -a "Markdown Preview" README.md`, or
 - drag a file onto the window or Dock icon, or `File → Open…`.
 
-⌘F finds, text is selectable and copyable, links open in your browser, dark mode follows the system.
+⌘F opens a native find bar, the toolbar button switches to the raw Markdown source, text is selectable and copyable, links open in your browser, dark mode follows the system.
 
 Rendering matches GitHub: tables, task lists, syntax-highlighted code, Mermaid diagrams, autolinked URLs, clickable tables of contents, local and remote images.
 
@@ -26,9 +26,9 @@ Requires macOS 14. No Swift package dependencies; the renderer is a bundled web 
 
     MarkdownPreview/
     ├── MarkdownPreviewApp.swift   DocumentGroup(viewing:) + Find menu
-    ├── ContentView.swift          WKWebView host (ViewerWebView), link handling, drop target
+    ├── ContentView.swift          native find bar + WKWebView host, link handling, drop target
     ├── Document.swift             FileDocument + FileWatcher (live reload)
     ├── Resources/
-    │   ├── viewer.html/.css/.js   the page: markdown-it setup, task lists, heading ids, find bar
+    │   ├── viewer.html/.css/.js   the page: markdown-it setup, task lists, heading ids, find/highlight, raw mode
     │   └── vendor/                markdown-it, highlight.js, mermaid, github-markdown-css
     └── Sample.md                  element gallery for manual testing

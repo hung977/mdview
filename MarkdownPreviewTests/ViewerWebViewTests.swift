@@ -87,19 +87,15 @@ final class ViewerWebViewTests: XCTestCase {
         expectTrue("window.__pwned === undefined")
     }
 
-    func testFindBarCountsAndHighlightsMatchesWithoutTouchingSelection() {
+    func testFindApiCountsAndHighlightsMatchesWithoutTouchingSelection() {
         webView.render("alpha beta gamma beta")
         expectTrue("document.querySelector('#content').textContent.includes('gamma')")
-        webView.showFind(nil)
-        expectTrue("document.activeElement && document.activeElement.id === 'findinput'")
-        expectTrue("(function(){ const i = document.getElementById('findinput'); i.value = 'beta'; i.dispatchEvent(new Event('input')); return true; })()")
-        expectTrue("document.getElementById('findcount').textContent === '1 of 2'")
+        expectTrue("findSet('beta') === '1 of 2'")
         expectTrue("CSS.highlights.get('find-match').size === 2 && CSS.highlights.get('find-current').size === 1")
-        expectTrue("document.activeElement.id === 'findinput' && getSelection().rangeCount <= 1")
-        webView.findNext(nil)
-        expectTrue("document.getElementById('findcount').textContent === '2 of 2'")
-        expectTrue("(function(){ const i = document.getElementById('findinput'); i.value = 'zzz'; i.dispatchEvent(new Event('input')); return true; })()")
-        expectTrue("document.getElementById('findcount').textContent === 'Not found'")
+        expectTrue("getSelection().rangeCount === 0 || getSelection().isCollapsed")
+        expectTrue("findNext() === '2 of 2' && findNext() === '1 of 2' && findPrevious() === '2 of 2'")
+        expectTrue("findSet('zzz') === 'Not found'")
+        expectTrue("findClear() === '' && !CSS.highlights.get('find-current')")
     }
 
     func testRerenderKeepsSinglePageAndUpdatesContent() {
@@ -107,5 +103,23 @@ final class ViewerWebViewTests: XCTestCase {
         expectTrue("document.querySelector('h1#one')")
         webView.render("# Two")
         expectTrue("document.querySelector('h1#two') && !document.querySelector('h1#one')")
+    }
+
+    func testRawModeShowsSourceVerbatimAndPreviewComesBack() {
+        webView.render("# Title\n\n**bold** <b>x</b>")
+        expectTrue("document.querySelector('h1#title')")
+        webView.setMode(raw: true)
+        expectTrue("document.querySelector('pre.raw-source code') && document.querySelector('pre.raw-source').textContent === '# Title\\n\\n**bold** <b>x</b>'")
+        expectTrue("!document.querySelector('h1') && !document.querySelector('b')")
+        webView.setMode(raw: false)
+        expectTrue("document.querySelector('h1#title') && !document.querySelector('pre.raw-source')")
+    }
+
+    func testRawModeRequestedBeforePageLoadIsHonoured() {
+        let early = ViewerWebView(baseURL: nil)
+        early.setMode(raw: true)
+        early.render("# Early")
+        webView = early
+        expectTrue("document.querySelector('pre.raw-source') && document.querySelector('pre.raw-source').textContent === '# Early'")
     }
 }

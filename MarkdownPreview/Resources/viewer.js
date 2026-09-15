@@ -72,14 +72,25 @@
   });
 
   let lastSource = null;
+  let mode = 'preview';   // 'preview' | 'raw'
   const content = document.getElementById('content');
 
   window.render = function (source, base) {
     lastSource = source;
     if (base !== undefined) document.querySelector('base').href = base;   // relative images/links
-    content.innerHTML = md.render(source, { slugs: {} });
+    content.classList.toggle('raw', mode === 'raw');
+    content.innerHTML = mode === 'raw'
+      ? '<pre class="raw-source"><code>' + md.utils.escapeHtml(source) + '</code></pre>'
+      : md.render(source, { slugs: {} });
     renderDiagrams();
     refreshFind();
+  };
+
+  // Swift toggles between the rendered preview and the raw Markdown source.
+  window.setMode = function (newMode) {
+    if (newMode === mode) return;
+    mode = newMode;
+    if (lastSource !== null) render(lastSource);
   };
 
   function renderDiagrams() {
@@ -110,19 +121,16 @@
     if (lastSource !== null && content.querySelector('pre.mermaid, svg[id^="mermaid"]')) render(lastSource);
   });
 
-  // ---- Find bar ----
-  // Matches are located in #content and painted with the CSS Custom Highlight API, so the
-  // search field keeps focus and the page selection is never touched.
-  const bar = document.getElementById('findbar');
-  const input = document.getElementById('findinput');
-  const count = document.getElementById('findcount');
+  // ---- Find ----
+  // Driven by the native find bar in Swift. Matches are located in #content and painted with the
+  // CSS Custom Highlight API, so the page selection is never touched. Each call returns a status
+  // string for the bar ("3 of 12", "Not found" or "").
   const highlightsSupported = typeof CSS !== 'undefined' && CSS.highlights && typeof Highlight === 'function';
+  let query = '';
   let matches = [];
   let current = -1;
 
-  function findVisible() { return !bar.hidden; }
-
-  function collectMatches(query) {
+  function collectMatches() {
     matches = [];
     if (!query) return;
     const needle = query.toLowerCase();
@@ -149,48 +157,25 @@
     else CSS.highlights.delete('find-current');
   }
 
-  function clearMatches() {
-    matches = [];
-    current = -1;
-    if (highlightsSupported) { CSS.highlights.delete('find-match'); CSS.highlights.delete('find-current'); }
-    count.textContent = '';
+  function status() {
+    if (!query) return '';
+    return matches.length ? (current + 1) + ' of ' + matches.length : 'Not found';
   }
 
   function goTo(index) {
-    if (!matches.length) { count.textContent = input.value ? 'Not found' : ''; current = -1; paint(); return; }
+    if (!matches.length) { current = -1; paint(); return status(); }
     current = ((index % matches.length) + matches.length) % matches.length;
     paint();
-    count.textContent = (current + 1) + ' of ' + matches.length;
     const rect = matches[current].getBoundingClientRect();
-    const barHeight = bar.getBoundingClientRect().height;
-    if (rect.top < barHeight || rect.bottom > innerHeight) {
+    if (rect.top < 0 || rect.bottom > innerHeight) {
       scrollTo({ top: scrollY + rect.top - innerHeight / 2, behavior: 'auto' });
     }
+    return status();
   }
 
-  function search() {
-    collectMatches(input.value);
-    goTo(0);
-  }
-
-  window.showFind = function () {
-    bar.hidden = false;
-    input.focus();
-    input.select();
-    if (input.value) search();
-  };
-  window.findNext = function () { if (findVisible() && matches.length) goTo(current + 1); else showFind(); };
-  window.findPrevious = function () { if (findVisible() && matches.length) goTo(current - 1); else showFind(); };
-  window.hideFind = function () { bar.hidden = true; clearMatches(); input.blur(); };
-  window.refreshFind = function () { if (findVisible()) search(); else clearMatches(); };
-
-  input.addEventListener('input', search);
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.shiftKey ? findPrevious() : findNext(); e.preventDefault(); }
-    else if (e.key === 'Escape') { hideFind(); e.preventDefault(); }
-  });
-  document.getElementById('findnext').addEventListener('click', findNext);
-  document.getElementById('findprev').addEventListener('click', findPrevious);
-  document.getElementById('finddone').addEventListener('click', hideFind);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && findVisible()) hideFind(); });
+  window.findSet = function (newQuery) { query = newQuery || ''; collectMatches(); return goTo(0); };
+  window.findNext = function () { return goTo(current + 1); };
+  window.findPrevious = function () { return goTo(current - 1); };
+  window.findClear = function () { query = ''; matches = []; current = -1; paint(); return ''; };
+  window.refreshFind = function () { if (query) { collectMatches(); goTo(Math.max(current, 0)); } };
 })();

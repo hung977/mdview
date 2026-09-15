@@ -111,12 +111,17 @@ than GitHub). The engine was replaced; everything outside the rendering box is u
   `#content` in place, so live reload keeps the scroll position.
 - **Security:** CSP with a per-process script nonce — HTML embedded in a Markdown file cannot run
   scripts or inline handlers; only images/fonts may be fetched.
-- **Find:** in-page find bar (`window.find`) driven by Edit ▸ Find (⌘F / ⌘G / ⇧⌘G), which targets the
-  `ViewerWebView` in the key window.
+- **Find:** a native AppKit find bar (`FindBar`: NSSearchField, ‹ › segmented control, Done; small controls
+  like NSTextView's) stacked above the web view in `ViewerView`. Edit ▸ Find (⌘F / ⌘G / ⇧⌘G) targets the
+  `ViewerView` in the key window. The page only searches and paints matches (`findSet/findNext/findPrevious/
+  findClear` using the CSS Custom Highlight API), returning "3 of 12" for the bar. Both the bar and the web
+  view own private `UndoManager`s so nothing marks the document "Edited".
+- **Raw view:** a toolbar toggle (`doc.plaintext`) switches the page between rendered preview and the raw
+  Markdown source (`setMode`).
 - **Links:** in-page `#anchors` scroll via JS; `.md`/`.markdown` file links open in the app; anything
   else goes to `NSWorkspace`.
 - **Layout:** `.markdown-body` centred, max-width 920 px, reflows with the window.
 - **Files:** `MarkdownPreviewApp.swift`, `Document.swift`, `ContentView.swift` (ContentView,
-  `MarkdownWebView`, `ViewerWebView`, `Page`), `Resources/`. `MarkdownRenderer.swift` deleted.
+  `MarkdownWebView`, `ViewerView`, `FindBar`, `ViewerWebView`, `Page`), `Resources/`. `MarkdownRenderer.swift` deleted.
 - **Tests:** `ViewerWebViewTests` render through the real page and assert on the DOM; `FileWatcherTests` unchanged.
 - **Cost:** one extra WebContent process (~140 MB on an 86 KB, 428-row document); window still appears in ~0.4 s.

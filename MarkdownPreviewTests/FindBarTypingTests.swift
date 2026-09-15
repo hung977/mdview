@@ -1,48 +1,32 @@
 import XCTest
-import WebKit
 import SwiftUI
 @testable import MarkdownPreview
 
-/// The find bar must accept keyboard input when the web view sits in a real key window.
+/// ⌘F opens a native find bar; typing there must reach the search field and never the document's undo manager.
 final class FindBarTypingTests: XCTestCase {
-    func testTypingReachesFindInput() { run(hosting: false) }
-    func testTypingReachesFindInputInsideSwiftUIHostingView() { run(hosting: true) }
+    func testTypingReachesFindField() { run(hosting: false) }
+    func testTypingReachesFindFieldInsideSwiftUIHostingView() { run(hosting: true) }
 
     private func run(hosting: Bool) {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
                               styleMask: [.titled], backing: .buffered, defer: false)
-        let webView: ViewerWebView
+        let viewer: ViewerView
         if hosting {
-            window.contentView = NSHostingView(rootView: MarkdownWebView(text: "hello world", baseURL: nil))
+            window.contentView = NSHostingView(rootView: MarkdownWebView(text: "hello world", baseURL: nil, showRaw: false))
             window.makeKeyAndOrderFront(nil)
             RunLoop.main.run(until: Date().addingTimeInterval(0.3))
-            webView = ViewerWebView.first(in: window.contentView!)!
+            viewer = ViewerView.first(in: window.contentView!)!
         } else {
-            webView = ViewerWebView(baseURL: nil)
-            window.contentView = webView
+            viewer = ViewerView(baseURL: nil)
+            window.contentView = viewer
             window.makeKeyAndOrderFront(nil)
-            webView.render("hello world")
+            viewer.webView.render("hello world")
         }
-        window.makeFirstResponder(webView)
-
-        func js(_ script: String) -> Any? {
-            var result: Any?
-            let done = expectation(description: "js")
-            webView.evaluateJavaScript(script) { value, error in result = value ?? error?.localizedDescription; done.fulfill() }
-            wait(for: [done], timeout: 5)
-            return result
-        }
-        var tries = 0
-        while (js("document.querySelector('#content').textContent") as? String)?.contains("hello") != true, tries < 100 {
-            RunLoop.main.run(until: Date().addingTimeInterval(0.05)); tries += 1
-        }
-        webView.showFind(nil)
-        tries = 0
-        while js("document.activeElement && document.activeElement.id") as? String != "findinput", tries < 100 {
-            RunLoop.main.run(until: Date().addingTimeInterval(0.05)); tries += 1
-        }
-        XCTAssertEqual(js("document.activeElement.id") as? String, "findinput")
-        XCTAssertEqual(window.firstResponder as? NSView, webView)
+        XCTAssertTrue(viewer.findBar.isHidden)
+        viewer.showFind(nil)
+        RunLoop.main.run(until: Date().addingTimeInterval(0.1))
+        XCTAssertFalse(viewer.findBar.isHidden)
+        XCTAssertTrue((window.firstResponder as? NSText)?.delegate === viewer.findBar.field, "search field should be editing")
 
         for (char, code) in [("w", UInt16(13)), ("o", UInt16(31))] {
             for type in [NSEvent.EventType.keyDown, .keyUp] {
@@ -50,14 +34,21 @@ final class FindBarTypingTests: XCTestCase {
                                              windowNumber: window.windowNumber, context: nil, characters: char,
                                              charactersIgnoringModifiers: char, isARepeat: false, keyCode: code)!
                 window.sendEvent(event)
-                RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+                RunLoop.main.run(until: Date().addingTimeInterval(0.02))
             }
         }
-        tries = 0
-        while js("document.getElementById('findinput').value") as? String != "wo", tries < 40 {
-            RunLoop.main.run(until: Date().addingTimeInterval(0.05)); tries += 1
-        }
-        XCTAssertEqual(js("document.getElementById('findinput').value") as? String, "wo")
+        XCTAssertEqual(viewer.findBar.field.stringValue, "wo")
+        // Nothing may reach the window/document undo manager (that is what marks a document "Edited").
+        XCTAssertFalse(window.undoManager?.canUndo ?? false)
+
+        // Status arrives asynchronously from the page.
+        var tries = 0
+        while viewer.findBar.status != "1 of 1", tries < 100 { RunLoop.main.run(until: Date().addingTimeInterval(0.05)); tries += 1 }
+        XCTAssertEqual(viewer.findBar.status, "1 of 1")
+
+        viewer.hideFind()
+        XCTAssertTrue(viewer.findBar.isHidden)
+        XCTAssertTrue(window.firstResponder === viewer.webView)
         window.orderOut(nil)
     }
 }
