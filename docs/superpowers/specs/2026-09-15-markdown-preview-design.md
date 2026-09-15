@@ -35,10 +35,10 @@ No MVVM, no coordinators, no DI. Four source files.
 ## Components
 
 ### MarkdownPreviewApp
-`DocumentGroup(viewing: MarkdownDocument.self) { ContentView(document:, fileURL:) }`. This alone provides: File → Open (⌘O), Open Recent, Open panel at launch when no document is given (Preview.app behaviour), window title = filename, Dock-icon drop, Launch Services handoff for double-click and `open -a "Markdown Preview" file.md`. No custom commands except none; the default Edit menu already contains Find (⌘F) which drives the text view's find bar.
+`DocumentGroup(viewing: MarkdownDocument.self) { ContentView(document:, fileURL:) }`. This alone provides: File → Open (⌘O), Open Recent, Open panel at launch when no document is given (Preview.app behaviour), window title = filename, Dock-icon drop, Launch Services handoff for double-click and `open -a "Markdown Preview" file.md`. No custom commands; the default Edit menu already contains Find (⌘F) which drives the text view's find bar.
 
 ### Document.swift
-- `MarkdownDocument: FileDocument` — `readableContentTypes = [.markdown, "net.daringfireball.markdown" imported type]`, `text: String` decoded as UTF‑8 (fallback: Latin‑1 so nothing fails to open). `fileWrapper(configuration:)` throws — never called in viewing mode.
+- `MarkdownDocument: FileDocument` — `readableContentTypes = [UTType("net.daringfireball.markdown")]` — declared in Info.plist as an imported type (`UTImportedTypeDeclarations`, extensions `md`/`markdown`, conforms to `public.plain-text`) since there is no system-provided Markdown UTType constant, `text: String` decoded as UTF‑8 (fallback: Latin‑1 so nothing fails to open). `fileWrapper(configuration:)` throws — never called in viewing mode.
 - `FileWatcher` — `final class` holding a `DispatchSourceFileSystemObject` on `open(path, O_EVTONLY)`, mask `.write | .delete | .rename | .extend`. Fires `onChange()` on the main queue. On `.delete`/`.rename` (atomic saves by VS Code etc.) it cancels and re-arms after 100 ms if the path exists again. `deinit` cancels the source (which closes the fd in the cancel handler).
 
 ### ContentView.swift
