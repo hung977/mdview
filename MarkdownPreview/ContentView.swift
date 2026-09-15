@@ -5,6 +5,7 @@ struct ContentView: View {
     let document: MarkdownDocument
     let fileURL: URL?
     @State private var text: String
+    @State private var watcher: FileWatcher?
 
     init(document: MarkdownDocument, fileURL: URL?) {
         self.document = document
@@ -14,6 +15,15 @@ struct ContentView: View {
 
     var body: some View {
         MarkdownTextView(text: text, baseURL: fileURL?.deletingLastPathComponent())
+            .onAppear {
+                guard watcher == nil, let fileURL else { return }
+                watcher = FileWatcher(url: fileURL) { reload(from: fileURL) }
+            }
+    }
+
+    private func reload(from url: URL) {
+        guard let data = try? Data(contentsOf: url) else { return }   // mid-save; next event re-reads
+        text = MarkdownDocument.decode(data)
     }
 }
 
