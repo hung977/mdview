@@ -179,14 +179,14 @@ final class FindBar: NSView, NSSearchFieldDelegate {
         field.delegate = self
         field.target = self
         field.action = #selector(queryChanged)
-        field.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        field.setContentHuggingPriority(NSLayoutConstraint.Priority(1), for: .horizontal)   // stretch to fill the bar
 
         countLabel.controlSize = .small
         countLabel.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
         countLabel.textColor = .secondaryLabelColor
         countLabel.alignment = .left
         countLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
-        countLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 72).isActive = true
+        countLabel.setContentHuggingPriority(.required, for: .horizontal)
 
         arrows.segmentCount = 2
         arrows.trackingMode = .momentary
@@ -198,12 +198,14 @@ final class FindBar: NSView, NSSearchFieldDelegate {
         arrows.setWidth(28, forSegment: 1)
         arrows.target = self
         arrows.action = #selector(arrowClicked)
+        arrows.setContentHuggingPriority(.required, for: .horizontal)
 
         doneButton.controlSize = .small
         doneButton.bezelStyle = .rounded
         doneButton.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
         doneButton.target = self
         doneButton.action = #selector(doneClicked)
+        doneButton.setContentHuggingPriority(.required, for: .horizontal)
 
         let row = NSStackView(views: [field, countLabel, arrows, doneButton])
         row.orientation = .horizontal
@@ -226,7 +228,6 @@ final class FindBar: NSView, NSSearchFieldDelegate {
             separator.leadingAnchor.constraint(equalTo: leadingAnchor),
             separator.trailingAnchor.constraint(equalTo: trailingAnchor),
             separator.bottomAnchor.constraint(equalTo: bottomAnchor),
-            field.widthAnchor.constraint(lessThanOrEqualToConstant: 360),
         ])
     }
 

@@ -26,6 +26,9 @@ final class FindBarTypingTests: XCTestCase {
         viewer.showFind(nil)
         RunLoop.main.run(until: Date().addingTimeInterval(0.1))
         XCTAssertFalse(viewer.findBar.isHidden)
+        viewer.layoutSubtreeIfNeeded()
+        XCTAssertEqual(viewer.findBar.frame.width, viewer.frame.width, accuracy: 1)
+        XCTAssertGreaterThan(viewer.findBar.field.frame.width, 350, "search field should stretch across the bar")
         XCTAssertTrue((window.firstResponder as? NSText)?.delegate === viewer.findBar.field, "search field should be editing")
 
         for (char, code) in [("w", UInt16(13)), ("o", UInt16(31))] {
