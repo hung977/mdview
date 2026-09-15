@@ -37,6 +37,7 @@ struct ContentView: View {
         } detail: {
             MarkdownWebView(text: text, baseURL: fileURL?.deletingLastPathComponent(), showRaw: showRaw,
                             scrollRequest: scrollRequest) { outline = $0 }
+                .ignoresSafeArea(.container, edges: .top)   // page scrolls under the glass toolbar
                 .toolbar {
                     ToolbarItem {
                         Toggle(isOn: $showRaw) {
@@ -127,27 +128,47 @@ final class ViewerView: NSView {
     let webView: ViewerWebView
     let findBar = FindBar()
 
+    private var findBarTop: NSLayoutConstraint!
+    private var lastInset: CGFloat = -1
+
     init(baseURL: URL?) {
         webView = ViewerWebView(baseURL: baseURL)
         super.init(frame: .zero)
-        let stack = NSStackView(views: [findBar, webView])
-        stack.orientation = .vertical
-        stack.spacing = 0
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(stack)
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        findBar.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(webView)
+        addSubview(findBar)
+        findBarTop = findBar.topAnchor.constraint(equalTo: topAnchor)
         NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: topAnchor),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            findBar.widthAnchor.constraint(equalTo: stack.widthAnchor),
-            webView.widthAnchor.constraint(equalTo: stack.widthAnchor),
+            webView.topAnchor.constraint(equalTo: topAnchor),
+            webView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            webView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            findBarTop,
+            findBar.leadingAnchor.constraint(equalTo: leadingAnchor),
+            findBar.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
         findBar.isHidden = true
         findBar.onQueryChange = { [weak self] query in self?.run("findSet(\(FindBar.json(query)))") }
         findBar.onNext = { [weak self] in self?.findNext(nil) }
         findBar.onPrevious = { [weak self] in self?.findPrevious(nil) }
         findBar.onDone = { [weak self] in self?.hideFind() }
+    }
+
+    /// Keeps the find bar below the toolbar and tells the page how much chrome it scrolls under.
+    override func layout() {
+        super.layout()
+        var chrome: CGFloat = 0
+        if let window {
+            let topInWindow = convert(bounds, to: nil).maxY
+            chrome = max(0, topInWindow - window.contentLayoutRect.maxY)
+        }
+        findBarTop.constant = chrome
+        let inset = chrome + (findBar.isHidden ? 0 : findBar.fittingSize.height)
+        if inset != lastInset {
+            lastInset = inset
+            webView.evaluate("setTopInset(\(inset))") { _ in }
+        }
     }
 
     @available(*, unavailable)
@@ -161,6 +182,7 @@ final class ViewerView: NSView {
 
     @objc func showFind(_ sender: Any?) {
         findBar.isHidden = false
+        needsLayout = true
         window?.makeFirstResponder(findBar.field)
         findBar.field.selectText(nil)
         run("findSet(\(FindBar.json(findBar.field.stringValue)))")
@@ -176,6 +198,7 @@ final class ViewerView: NSView {
 
     func hideFind() {
         findBar.isHidden = true
+        needsLayout = true
         run("findClear()")
         window?.makeFirstResponder(webView)
     }
@@ -189,7 +212,7 @@ final class ViewerView: NSView {
 }
 
 /// Small-control find bar modelled on NSTextView's: search field, count, ‹ ›, Done.
-final class FindBar: NSView, NSSearchFieldDelegate {
+final class FindBar: NSVisualEffectView, NSSearchFieldDelegate {
     let field = NSSearchField()
     private let countLabel = NSTextField(labelWithString: "")
     private let arrows = NSSegmentedControl()
@@ -210,7 +233,9 @@ final class FindBar: NSView, NSSearchFieldDelegate {
 
     init() {
         super.init(frame: .zero)
-        wantsLayer = true
+        material = .headerView
+        blendingMode = .withinWindow
+        state = .followsWindowActiveState
 
         field.controlSize = .small
         field.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
@@ -274,10 +299,6 @@ final class FindBar: NSView, NSSearchFieldDelegate {
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("not supported") }
-
-    override func updateLayer() {
-        layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
-    }
 
     @objc private func queryChanged() { onQueryChange?(field.stringValue) }
     @objc private func arrowClicked() { arrows.selectedSegment == 0 ? onPrevious?() : onNext?() }

@@ -114,6 +114,11 @@
     return JSON.stringify(headings);
   };
 
+  // Height of the window chrome (toolbar, find bar) the page scrolls underneath.
+  window.setTopInset = function (px) {
+    document.documentElement.style.setProperty('--top-inset', px + 'px');
+  };
+
   window.scrollToHeading = function (id) {
     const target = document.getElementById(id);
     if (target) target.scrollIntoView({ block: 'start' });
