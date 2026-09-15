@@ -79,3 +79,37 @@ final class FileWatcher {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: work)
     }
 }
+
+/// Makes MDViewer the default app for Markdown files (what Finder, Quick Look's "Open with" and
+/// double-click use). Offered once on first launch and available from the app menu afterwards.
+enum DefaultHandler {
+    private static let offeredKey = "didOfferDefaultHandler"
+
+    static var isDefault: Bool {
+        let sample = URL(fileURLWithPath: "/tmp/mdview-probe.md")
+        return NSWorkspace.shared.urlForApplication(toOpen: sample)?.standardizedFileURL == Bundle.main.bundleURL.standardizedFileURL
+    }
+
+    /// True the first time the app runs while another app owns Markdown files; marks the offer as made.
+    static func shouldOffer() -> Bool {
+        guard !UserDefaults.standard.bool(forKey: offeredKey), !isDefault else { return false }
+        UserDefaults.standard.set(true, forKey: offeredKey)
+        return true
+    }
+
+    static func offer() {
+        let alert = NSAlert()
+        alert.messageText = "Open Markdown files with MDViewer?"
+        alert.informativeText = "Finder, Quick Look and double-click will use MDViewer for .md and .markdown files. You can change this later from the MDViewer menu."
+        alert.addButton(withTitle: "Use MDViewer")
+        alert.addButton(withTitle: "Not Now")
+        if alert.runModal() == .alertFirstButtonReturn { setAsDefault() }
+    }
+
+    static func setAsDefault() {
+        NSWorkspace.shared.setDefaultApplication(at: Bundle.main.bundleURL, toOpen: .markdownDocument) { error in
+            guard let error else { return }
+            DispatchQueue.main.async { NSAlert(error: error).runModal() }
+        }
+    }
+}

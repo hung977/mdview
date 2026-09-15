@@ -387,7 +387,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.hungpv.mdviewTests;
 				SDKROOT = macosx;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/mdview.app/Contents/MacOS/mdview";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MDViewer.app/Contents/MacOS/MDViewer";
 			};
 			name = Release;
 		};
@@ -484,7 +484,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.hungpv.mdviewTests;
 				SDKROOT = macosx;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/mdview.app/Contents/MacOS/mdview";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MDViewer.app/Contents/MacOS/MDViewer";
 			};
 			name = Debug;
 		};
@@ -502,7 +502,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.hungpv.mdview;
 				PRODUCT_MODULE_NAME = mdview;
-				PRODUCT_NAME = mdview;
+				PRODUCT_NAME = MDViewer;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -521,7 +521,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.hungpv.mdview;
 				PRODUCT_MODULE_NAME = mdview;
-				PRODUCT_NAME = mdview;
+				PRODUCT_NAME = MDViewer;
 				SDKROOT = macosx;
 			};
 			name = Release;

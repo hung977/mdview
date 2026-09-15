@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/images/icon.png" width="128" alt="mdview icon">
+  <img src="docs/images/icon.png" width="128" alt="MDViewer icon">
 </p>
 
-<h1 align="center">mdview</h1>
+<h1 align="center">MDViewer</h1>
 
 <p align="center">
   A small, native macOS viewer for Markdown files — open, read, done.<br>
@@ -27,24 +27,22 @@
 
 ## Install
 
-1. Download `mdview-<version>.zip` from the [latest release](https://github.com/hung977/mdview/releases/latest).
-2. Unzip and move `mdview.app` to `/Applications`.
+1. Download `MDViewer-<version>.zip` from the [latest release](https://github.com/hung977/mdview/releases/latest).
+2. Unzip and move `MDViewer.app` to `/Applications`.
 3. The app is signed ad hoc (not notarized), so allow it once:
 
    ```sh
-   xattr -dr com.apple.quarantine /Applications/mdview.app
+   xattr -dr com.apple.quarantine /Applications/MDViewer.app
    ```
 
    or right-click the app → **Open**.
-4. Launch it once so macOS registers the file association and the Quick Look extension.
-
-To make it the default for Markdown files: right-click any `.md` file → **Get Info** → *Open with* → mdview → **Change All…**
+4. Launch it once so macOS registers the file association and the Quick Look extension. On first launch MDViewer offers to become the default app for Markdown files; you can also do that later from the **MDViewer** menu.
 
 ## Usage
 
 | Action | How |
 |---|---|
-| Open a file | double-click in Finder, drag onto the window or Dock icon, `File ▸ Open…`, or `open -a mdview README.md` |
+| Open a file | double-click in Finder, drag onto the window or Dock icon, `File ▸ Open…`, or `open -a MDViewer README.md` |
 | Quick Look | select a `.md` file in Finder and press **Space** |
 | Outline | toolbar sidebar button; click a heading to jump to it |
 | Find | **⌘F** to focus search, **⌘G** / **⇧⌘G** next / previous, **Enter** in the field for next |
@@ -63,7 +61,7 @@ git clone https://github.com/hung977/mdview.git
 cd mdview
 make            # Debug build (generates the Xcode project if needed)
 make test       # unit tests
-make release    # Release build → dist/mdview.app and dist/mdview-<version>.zip
+make release    # Release build → dist/MDViewer.app and dist/MDViewer-<version>.zip
 make install    # copy the Release build to /Applications and register Quick Look
 ```
 
@@ -76,7 +74,7 @@ The app is a SwiftUI `DocumentGroup(viewing:)` shell around a single `WKWebView`
 A `DispatchSource` watches the open file (including atomic saves that replace the inode). The Quick Look extension reuses the same web view and page, sandboxed. HTML embedded in a document is rendered but cannot run scripts (CSP with a per-process nonce).
 
 ```
-mdview/
+mdview/                     app sources (module `mdview`)
 ├── MDViewApp.swift         DocumentGroup, Find / View menu commands
 ├── ContentView.swift       NavigationSplitView (outline + viewer), toolbar, info inspector, drop target
 ├── Viewer.swift            ViewerWebView (WKWebView) + Page — shared with the Quick Look extension

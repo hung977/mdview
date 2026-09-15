@@ -18,6 +18,7 @@ struct ContentView: View {
     @State private var findStatus = ""
     @State private var zoom: CGFloat = 1
     @State private var sidebar: NavigationSplitViewVisibility = .detailOnly   // collapsed until the user opens it
+    @State private var offerDefault = false
 
     init(document: MarkdownDocument, fileURL: URL?) {
         self.document = document
@@ -44,7 +45,8 @@ struct ContentView: View {
         } detail: {
             MarkdownWebView(text: text, baseURL: fileURL?.deletingLastPathComponent(), showRaw: showRaw,
                             scrollRequest: scrollRequest, query: query,
-                            onRender: { outline = $0.outline; stats = $0.stats }, onFindStatus: { findStatus = $0 },
+                            onRender: { outline = $0.outline; stats = $0.stats; offerDefaultIfNeeded() },
+                            onFindStatus: { findStatus = $0 },
                             onZoomChange: { zoom = $0 })
                 .ignoresSafeArea(.container, edges: .top)   // page scrolls under the glass toolbar
                 .inspector(isPresented: $showInfo) {
@@ -64,6 +66,7 @@ struct ContentView: View {
         .onAppear {
             guard watcher == nil, let fileURL else { return }
             watcher = FileWatcher(url: fileURL) { reload(from: fileURL) }
+            offerDefault = DefaultHandler.shouldOffer()
         }
         .onDrop(of: [.fileURL], isTargeted: nil) { providers in
             for provider in providers {
@@ -112,6 +115,13 @@ struct ContentView: View {
                 ShareLink(item: fileURL) { Label("Share", systemImage: "square.and.arrow.up") }
             }
         }
+    }
+
+    /// First-run question, asked once the page has content so nothing renders behind a blank window.
+    private func offerDefaultIfNeeded() {
+        guard offerDefault else { return }
+        offerDefault = false
+        DispatchQueue.main.async { DefaultHandler.offer() }
     }
 
     private func reload(from url: URL) {
@@ -306,3 +316,4 @@ final class ViewerView: NSView {
         onZoomChange?(webView.zoom)
     }
 }
+

@@ -9,6 +9,9 @@ struct MDViewApp: App {
         .defaultSize(width: 1100, height: 900)
         .windowToolbarStyle(.unified)   // sidebar + glass toolbar, like Preview.app
         .commands {
+            CommandGroup(after: .appInfo) {
+                Button("Use MDViewer as Default Markdown Viewer") { DefaultHandler.setAsDefault() }
+            }
             // SwiftUI's default Edit menu has no Find items; these drive the toolbar search field.
             CommandGroup(after: .pasteboard) {
                 Menu("Find") {

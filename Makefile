@@ -1,7 +1,7 @@
-# mdview — build, test and package.
+# MDViewer — build, test and package.
 #   make            build Debug
 #   make test       run the unit tests
-#   make release    Release build → dist/mdview.app + dist/mdview-<version>.zip
+#   make release    Release build → dist/MDViewer.app + dist/MDViewer-<version>.zip
 #   make install    copy the Release build to /Applications
 #   make clean
 
@@ -10,8 +10,8 @@ SCHEME    := mdview
 DERIVED   := build
 DIST      := dist
 VERSION   := $(shell /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' mdview/Info.plist 2>/dev/null || echo 0.0)
-APP       := $(DIST)/mdview.app
-ZIP       := $(DIST)/mdview-$(VERSION).zip
+APP       := $(DIST)/MDViewer.app
+ZIP       := $(DIST)/MDViewer-$(VERSION).zip
 XCODEBUILD := xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination 'platform=macOS' -derivedDataPath $(DERIVED)
 
 .PHONY: all project build test release install clean
@@ -35,18 +35,18 @@ release: $(PROJECT)
 	rm -rf "$(APP)" "$(ZIP)"
 	mkdir -p $(DIST)
 	$(XCODEBUILD) -configuration Release build | grep -E 'error|BUILD'
-	cp -R "$(DERIVED)/Build/Products/Release/mdview.app" "$(APP)"
+	cp -R "$(DERIVED)/Build/Products/Release/MDViewer.app" "$(APP)"
 	codesign --verify --deep --strict "$(APP)"
 	ditto -c -k --sequesterRsrc --keepParent "$(APP)" "$(ZIP)"
 	@echo "→ $(APP)"
 	@echo "→ $(ZIP) ($$(du -h "$(ZIP)" | cut -f1))"
 
 install: release
-	rm -rf /Applications/mdview.app
-	cp -R "$(APP)" /Applications/mdview.app
-	xattr -dr com.apple.quarantine /Applications/mdview.app 2>/dev/null || true
-	/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/mdview.app
-	@echo "Installed /Applications/mdview.app (Quick Look extension registered)"
+	rm -rf /Applications/MDViewer.app
+	cp -R "$(APP)" /Applications/MDViewer.app
+	xattr -dr com.apple.quarantine /Applications/MDViewer.app 2>/dev/null || true
+	/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/MDViewer.app
+	@echo "Installed /Applications/MDViewer.app (Quick Look extension registered)"
 
 clean:
 	rm -rf $(DERIVED) $(DIST)
