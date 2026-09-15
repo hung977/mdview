@@ -10,6 +10,7 @@ struct ContentView: View {
     @State private var showRaw = false
     @State private var showInfo = false
     @State private var outline: [Heading] = []
+    @State private var stats = DocumentStats()
     @State private var selectedHeading: Heading.ID?
     @State private var scrollRequest: ScrollRequest?
     @State private var query = ""
@@ -43,9 +44,13 @@ struct ContentView: View {
         } detail: {
             MarkdownWebView(text: text, baseURL: fileURL?.deletingLastPathComponent(), showRaw: showRaw,
                             scrollRequest: scrollRequest, query: query,
-                            onOutline: { outline = $0 }, onFindStatus: { findStatus = $0 },
+                            onRender: { outline = $0.outline; stats = $0.stats }, onFindStatus: { findStatus = $0 },
                             onZoomChange: { zoom = $0 })
                 .ignoresSafeArea(.container, edges: .top)   // page scrolls under the glass toolbar
+                .inspector(isPresented: $showInfo) {
+                    FileInfoView(fileURL: fileURL, stats: stats, headings: outline.count)
+                        .inspectorColumnWidth(min: 260, ideal: 300, max: 420)
+                }
                 .toolbar { toolbarItems }
                 .searchable(text: $query, placement: .toolbar, prompt: "Search")
                 .searchFocused($searchFocused)
@@ -100,10 +105,9 @@ struct ContentView: View {
         }
         if #available(macOS 26, *) { ToolbarSpacer(.fixed) }
         ToolbarItemGroup {
-            Button { showInfo.toggle() } label: { Label("Info", systemImage: "info") }
-                .popover(isPresented: $showInfo, arrowEdge: .bottom) {
-                    FileInfoView(fileURL: fileURL, text: text, headings: outline.count)
-                }
+            Toggle(isOn: $showInfo) { Label("Info", systemImage: "info") }
+                .toggleStyle(.button)
+                .help("Show Inspector")
             if let fileURL {
                 ShareLink(item: fileURL) { Label("Share", systemImage: "square.and.arrow.up") }
             }
@@ -120,41 +124,51 @@ extension Notification.Name {
     static let mdviewFocusSearch = Notification.Name("mdview.focusSearch")
 }
 
-/// The "i" popover: what Finder's Get Info shows, plus text statistics.
+/// The Info inspector (Preview.app style): file facts, then document statistics.
 struct FileInfoView: View {
     let fileURL: URL?
-    let text: String
+    let stats: DocumentStats
     let headings: Int
 
     var body: some View {
         let attributes = fileURL.flatMap { try? FileManager.default.attributesOfItem(atPath: $0.path) } ?? [:]
-        let words = text.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count
-        let lines = text.split(omittingEmptySubsequences: false, whereSeparator: \.isNewline).count
-        Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 12, verticalSpacing: 6) {
-            if let fileURL {
-                row("Name", fileURL.lastPathComponent)
-                row("Where", fileURL.deletingLastPathComponent().path(percentEncoded: false))
+        Form {
+            Section {
+                if let fileURL {
+                    row("File Name", fileURL.lastPathComponent)
+                    row("Document Type", "Markdown document")
+                    row("Where", fileURL.deletingLastPathComponent().path(percentEncoded: false))
+                }
+                if let size = attributes[.size] as? Int {
+                    row("Size", ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file))
+                }
+                if let created = attributes[.creationDate] as? Date {
+                    row("Created", created.formatted(date: .abbreviated, time: .shortened))
+                }
+                if let modified = attributes[.modificationDate] as? Date {
+                    row("Modified", modified.formatted(date: .abbreviated, time: .shortened))
+                }
             }
-            if let size = attributes[.size] as? Int {
-                row("Size", ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file))
+            Section {
+                row("Words", stats.words.formatted())
+                row("Characters", stats.characters.formatted())
+                row("Lines", stats.lines.formatted())
+                row("Headings", headings.formatted())
+                row("Links", stats.links.formatted())
+                row("Images", stats.images.formatted())
+                row("Tables", stats.tables.formatted())
+                row("Code Blocks", stats.codeBlocks.formatted())
+                row("Diagrams", stats.diagrams.formatted())
             }
-            if let modified = attributes[.modificationDate] as? Date {
-                row("Modified", modified.formatted(date: .abbreviated, time: .shortened))
-            }
-            Divider().gridCellUnsizedAxes(.horizontal)
-            row("Words", words.formatted())
-            row("Characters", text.count.formatted())
-            row("Lines", lines.formatted())
-            row("Headings", headings.formatted())
         }
-        .padding(16)
-        .frame(minWidth: 280, maxWidth: 420)
+        .formStyle(.grouped)
     }
 
     private func row(_ label: String, _ value: String) -> some View {
-        GridRow {
-            Text(label).foregroundStyle(.secondary).gridColumnAlignment(.trailing)
-            Text(value).textSelection(.enabled).lineLimit(3)
+        LabeledContent(label) {
+            Text(value)
+                .multilineTextAlignment(.trailing)
+                .textSelection(.enabled)
         }
     }
 }
@@ -173,7 +187,7 @@ struct MarkdownWebView: NSViewRepresentable {
     let showRaw: Bool
     let scrollRequest: ScrollRequest?
     let query: String
-    let onOutline: ([Heading]) -> Void
+    let onRender: (RenderResult) -> Void
     let onFindStatus: (String) -> Void
     let onZoomChange: (CGFloat) -> Void
 
@@ -201,8 +215,8 @@ struct MarkdownWebView: NSViewRepresentable {
         }
         if coordinator.lastText != text {
             coordinator.lastText = text
-            let onOutline = onOutline
-            viewer.webView.render(text) { outline in DispatchQueue.main.async { onOutline(outline) } }
+            let onRender = onRender
+            viewer.webView.render(text) { result in DispatchQueue.main.async { onRender(result) } }
         }
         if coordinator.lastScrollRequest != scrollRequest, let scrollRequest {
             coordinator.lastScrollRequest = scrollRequest

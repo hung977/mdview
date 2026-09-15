@@ -102,16 +102,34 @@
   let mode = 'preview';   // 'preview' | 'raw'
   const content = document.getElementById('content');
 
-  // Returns the outline as JSON so Swift can fill the sidebar.
+  // Document statistics for the Info inspector, counted on the rendered HTML.
+  function stats(source, html) {
+    const probe = document.createElement('template');
+    probe.innerHTML = html;
+    const count = sel => probe.content.querySelectorAll(sel).length;
+    return {
+      words: (source.match(/\S+/g) || []).length,
+      characters: source.length,
+      lines: source.split('\n').length,
+      links: count('a[href]'),
+      images: count('img'),
+      tables: count('table'),
+      codeBlocks: count('pre:not(.mermaid)'),
+      diagrams: count('pre.mermaid'),
+    };
+  }
+
+  // Returns {outline, stats} as JSON so Swift can fill the sidebar and the Info inspector.
   window.render = function (source, base) {
     lastSource = source;
     if (base !== undefined) document.querySelector('base').href = base;   // relative images/links
     const headings = outline(source);
+    const html = md.render(source, { slugs: {} });
     content.classList.toggle('raw', mode === 'raw');
-    content.innerHTML = mode === 'raw' ? rawHtml(source, headings) : md.render(source, { slugs: {} });
+    content.innerHTML = mode === 'raw' ? rawHtml(source, headings) : html;
     renderDiagrams();
     refreshFind();
-    return JSON.stringify(headings);
+    return JSON.stringify({ outline: headings, stats: stats(source, html) });
   };
 
   // Height of the window chrome (toolbar, find bar) the page scrolls underneath.
@@ -165,6 +183,14 @@
   // CSS Custom Highlight API, so the page selection is never touched. Each call returns a status
   // string for the bar ("3 of 12", "Not found" or "").
   const highlightsSupported = typeof CSS !== 'undefined' && CSS.highlights && typeof Highlight === 'function';
+  // One registered Highlight per role, mutated in place: replacing registry entries leaves stale
+  // paint behind in WebKit.
+  const matchHighlight = highlightsSupported ? new Highlight() : null;
+  const currentHighlight = highlightsSupported ? new Highlight() : null;
+  if (highlightsSupported) {
+    CSS.highlights.set('find-match', matchHighlight);
+    CSS.highlights.set('find-current', currentHighlight);
+  }
   let query = '';
   let matches = [];
   let current = -1;
@@ -191,9 +217,10 @@
 
   function paint() {
     if (!highlightsSupported) return;
-    CSS.highlights.set('find-match', new Highlight(...matches));
-    if (current >= 0) CSS.highlights.set('find-current', new Highlight(matches[current]));
-    else CSS.highlights.delete('find-current');
+    matchHighlight.clear();
+    currentHighlight.clear();
+    for (const range of matches) matchHighlight.add(range);
+    if (current >= 0) currentHighlight.add(matches[current]);
   }
 
   function status() {

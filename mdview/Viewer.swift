@@ -7,12 +7,23 @@ struct Heading: Codable, Identifiable, Hashable {
     let text: String
 }
 
+/// Counts shown in the Info inspector.
+struct DocumentStats: Codable, Equatable {
+    var words = 0, characters = 0, lines = 0, links = 0, images = 0, tables = 0, codeBlocks = 0, diagrams = 0
+}
+
+/// What the page reports after each render.
+struct RenderResult: Codable {
+    var outline: [Heading] = []
+    var stats = DocumentStats()
+}
+
 /// WKWebView that hosts the bundled viewer page. `render(_:)` hands Markdown to the page's
 /// JavaScript, which replaces the document body in place (scroll position survives reloads).
 final class ViewerWebView: WKWebView, WKNavigationDelegate {
     private let baseURL: URL?
     private var pageReady = false
-    private var pendingMarkdown: (text: String, completion: (([Heading]) -> Void)?)?
+    private var pendingMarkdown: (text: String, completion: ((RenderResult) -> Void)?)?
     private var pendingWork: [() -> Void] = []
     private var mermaidLoaded = false
 
@@ -31,8 +42,8 @@ final class ViewerWebView: WKWebView, WKNavigationDelegate {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("not supported") }
 
-    /// Renders `markdown`; `completion` receives the document outline once the page has been updated.
-    func render(_ markdown: String, completion: (([Heading]) -> Void)? = nil) {
+    /// Renders `markdown`; `completion` receives the outline and statistics once the page has been updated.
+    func render(_ markdown: String, completion: ((RenderResult) -> Void)? = nil) {
         guard pageReady else { pendingMarkdown = (markdown, completion); return }
         let needsMermaid = markdown.contains("```mermaid") || markdown.contains("~~~mermaid")
         if needsMermaid && !mermaidLoaded {
@@ -43,14 +54,14 @@ final class ViewerWebView: WKWebView, WKNavigationDelegate {
         }
     }
 
-    private func callRender(_ markdown: String, completion: (([Heading]) -> Void)?) {
+    private func callRender(_ markdown: String, completion: ((RenderResult) -> Void)?) {
         let arguments = [markdown, baseURL?.absoluteString ?? ""]
         guard let data = try? JSONSerialization.data(withJSONObject: arguments),
-              let json = String(data: data, encoding: .utf8) else { completion?([]); return }
+              let json = String(data: data, encoding: .utf8) else { completion?(RenderResult()); return }
         evaluateJavaScript("render.apply(null, \(json))") { result, _ in
-            let outline = (result as? String).flatMap { $0.data(using: .utf8) }
-                .flatMap { try? JSONDecoder().decode([Heading].self, from: $0) } ?? []
-            completion?(outline)
+            let decoded = (result as? String).flatMap { $0.data(using: .utf8) }
+                .flatMap { try? JSONDecoder().decode(RenderResult.self, from: $0) } ?? RenderResult()
+            completion?(decoded)
         }
     }
 

@@ -95,7 +95,9 @@ final class ViewerWebViewTests: XCTestCase {
         expectTrue("getSelection().rangeCount === 0 || getSelection().isCollapsed")
         expectTrue("findNext() === '2 of 2' && findNext() === '1 of 2' && findPrevious() === '2 of 2'")
         expectTrue("findSet('zzz') === 'Not found'")
-        expectTrue("findClear() === '' && !CSS.highlights.get('find-current')")
+        expectTrue("findClear() === '' && CSS.highlights.get('find-current').size === 0 && CSS.highlights.get('find-match').size === 0")
+        // A new query must fully replace the previous matches.
+        expectTrue("findSet('alpha') === '1 of 1' && CSS.highlights.get('find-match').size === 1")
     }
 
     func testRerenderKeepsSinglePageAndUpdatesContent() {
@@ -125,14 +127,75 @@ final class ViewerWebViewTests: XCTestCase {
 
     func testRenderReturnsOutlineMatchingHeadingIdsInBothModes() {
         var outline: [Heading] = []
+        var stats = DocumentStats()
         let done = expectation(description: "render")
-        webView.render("# Title\n\n## Mục tiêu\n\ntext\n\n## Mục tiêu\n\n### Deep") { outline = $0; done.fulfill() }
+        webView.render("# Title\n\n## Mục tiêu\n\ntext [a](https://x.y)\n\n## Mục tiêu\n\n### Deep\n\n| a |\n|---|\n| 1 |\n") { outline = $0.outline; stats = $0.stats; done.fulfill() }
         wait(for: [done], timeout: 5)
+        XCTAssertEqual(stats.links, 1); XCTAssertEqual(stats.tables, 1); XCTAssertEqual(stats.lines, 14)
+        XCTAssertGreaterThan(stats.words, 5)
         XCTAssertEqual(outline.map(\.id), ["title", "mục-tiêu", "mục-tiêu-1", "deep"])
         XCTAssertEqual(outline.map(\.level), [1, 2, 2, 3])
         expectTrue("document.getElementById('mục-tiêu-1') && document.getElementById('deep')")
         expectTrue("scrollToHeading('deep') === true && scrollToHeading('nope') === false")
         webView.setMode(raw: true)
         expectTrue("document.querySelector('pre.raw-source #mục-tiêu-1') && document.querySelector('#deep').textContent === '### Deep'")
+    }
+
+    /// Paint-level check: highlights of a previous query must disappear when the query changes or is cleared.
+    func testStaleHighlightsAreRepaintedAway() {
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 600, height: 300), styleMask: [.titled], backing: .buffered, defer: false)
+        window.contentView = webView
+        window.orderFront(nil)
+        webView.render(String(repeating: "alpha beta gamma. ", count: 40))
+        expectTrue("document.querySelector('#content').textContent.includes('gamma')")
+        webView.zoom = 1.21   // the report came from a zoomed window
+
+        func highlightedPixels() -> Int {
+            var count = 0
+            let done = expectation(description: "snapshot")
+            webView.takeSnapshot(with: nil) { image, _ in
+                if let image, let tiff = image.tiffRepresentation, let rep = NSBitmapImageRep(data: tiff) {
+                    for y in stride(from: 0, to: rep.pixelsHigh, by: 3) {
+                        for x in stride(from: 0, to: rep.pixelsWide, by: 3) {
+                            if let c = rep.colorAt(x: x, y: y), c.redComponent > 0.9, c.greenComponent > 0.75, c.blueComponent < 0.75 { count += 1 }
+                        }
+                    }
+                }
+                done.fulfill()
+            }
+            wait(for: [done], timeout: 5)
+            return count
+        }
+
+        expectTrue("findSet('beta') === '1 of 40'")
+        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+        let withBeta = highlightedPixels()
+        XCTAssertGreaterThan(withBeta, 50, "matches should be painted")
+
+        expectTrue("findSet('zzz') === 'Not found'")
+        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+        XCTAssertEqual(highlightedPixels(), 0, "old highlights must be gone after a new query")
+
+        // Same thing for content that was off screen while the query changed.
+        webView.render(String(repeating: "alpha beta gamma.\n\n", count: 120))
+        expectTrue("document.querySelectorAll('#content p').length === 120")
+        expectTrue("findSet('beta') === '1 of 120'")
+        expectTrue("(scrollTo(0, 2400), true)")
+        RunLoop.main.run(until: Date().addingTimeInterval(0.4))
+        XCTAssertGreaterThan(highlightedPixels(), 50, "off-screen matches painted after scrolling to them")
+        expectTrue("(scrollTo(0, 0), true)")
+        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+        expectTrue("findSet('zzz') === 'Not found'")
+        expectTrue("(scrollTo(0, 2400), true)")
+        RunLoop.main.run(until: Date().addingTimeInterval(0.4))
+        XCTAssertEqual(highlightedPixels(), 0, "stale highlights must not survive off screen")
+
+        expectTrue("findSet('gamma') === '1 of 120'")
+        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+        XCTAssertGreaterThan(highlightedPixels(), 50)
+        expectTrue("findSet('') === ''")
+        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+        XCTAssertEqual(highlightedPixels(), 0, "clearing the query must clear the paint")
+        window.orderOut(nil)
     }
 }
