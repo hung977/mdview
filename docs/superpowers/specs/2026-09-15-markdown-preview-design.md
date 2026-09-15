@@ -140,3 +140,10 @@ than GitHub). The engine was replaced; everything outside the rendering box is u
 - `Viewer.swift` (ViewerWebView + Page) and `Resources/` are compiled into both the app and the extension;
   `Page` locates resources with `Bundle(for: ViewerWebView.self)`.
 - App icon generated programmatically (blue squircle, Markdown "M↓" mark) into `Assets.xcassets/AppIcon`.
+
+## Revision 4 (2026-09-15): Preview-style sidebar
+
+- `ContentView` is a `NavigationSplitView`: a system sidebar lists the document outline (`[Heading]`
+  returned by the page's `render()` — id/level/text computed with the same slug algorithm as the heading
+  anchors), indented per level; selecting an entry calls `scrollToHeading(id)`. In raw mode heading
+  lines are wrapped in `<span id>` so the sidebar keeps working. Toolbar style `.unified` (like Preview.app).

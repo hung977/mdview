@@ -122,4 +122,17 @@ final class ViewerWebViewTests: XCTestCase {
         webView = early
         expectTrue("document.querySelector('pre.raw-source') && document.querySelector('pre.raw-source').textContent === '# Early'")
     }
+
+    func testRenderReturnsOutlineMatchingHeadingIdsInBothModes() {
+        var outline: [Heading] = []
+        let done = expectation(description: "render")
+        webView.render("# Title\n\n## Mục tiêu\n\ntext\n\n## Mục tiêu\n\n### Deep") { outline = $0; done.fulfill() }
+        wait(for: [done], timeout: 5)
+        XCTAssertEqual(outline.map(\.id), ["title", "mục-tiêu", "mục-tiêu-1", "deep"])
+        XCTAssertEqual(outline.map(\.level), [1, 2, 2, 3])
+        expectTrue("document.getElementById('mục-tiêu-1') && document.getElementById('deep')")
+        expectTrue("scrollToHeading('deep') === true && scrollToHeading('nope') === false")
+        webView.setMode(raw: true)
+        expectTrue("document.querySelector('pre.raw-source #mục-tiêu-1') && document.querySelector('#deep').textContent === '### Deep'")
+    }
 }

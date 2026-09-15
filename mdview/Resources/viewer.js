@@ -28,21 +28,48 @@
     }
   });
 
-  // Heading ids.
+  function headingText(inline) {
+    return inline.children
+      ? inline.children.filter(t => t.type === 'text' || t.type === 'code_inline').map(t => t.content).join('')
+      : inline.content;
+  }
+  function uniqueSlug(text, slugs) {
+    let slug = slugify(text);
+    const seen = slugs[slug] || 0;
+    slugs[slug] = seen + 1;
+    return seen ? slug + '-' + seen : slug;
+  }
+
+  // Heading ids (same algorithm as outline() below, so sidebar ids match rendered ids).
   const defaultHeadingOpen = md.renderer.rules.heading_open ||
     ((tokens, idx, options, env, self) => self.renderToken(tokens, idx, options));
   md.renderer.rules.heading_open = function (tokens, idx, options, env, self) {
-    const inline = tokens[idx + 1];
-    const text = inline.children
-      ? inline.children.filter(t => t.type === 'text' || t.type === 'code_inline').map(t => t.content).join('')
-      : inline.content;
-    let slug = slugify(text);
-    const seen = env.slugs[slug] || 0;
-    env.slugs[slug] = seen + 1;
-    if (seen) slug += '-' + seen;
-    tokens[idx].attrSet('id', slug);
+    tokens[idx].attrSet('id', uniqueSlug(headingText(tokens[idx + 1]), env.slugs));
     return defaultHeadingOpen(tokens, idx, options, env, self);
   };
+
+  // Table of contents for the sidebar: [{id, level, text, line}].
+  function outline(source) {
+    const slugs = {};
+    const result = [];
+    const tokens = md.parse(source, {});
+    for (let i = 0; i < tokens.length; i++) {
+      if (tokens[i].type !== 'heading_open') continue;
+      const text = headingText(tokens[i + 1]);
+      result.push({ id: uniqueSlug(text, slugs), level: Number(tokens[i].tag.slice(1)), text,
+                    line: tokens[i].map ? tokens[i].map[0] : -1 });
+    }
+    return result;
+  }
+
+  // Raw view: escape the source, wrapping heading lines in anchors so the sidebar still works.
+  function rawHtml(source, headings) {
+    const lines = source.split('\n').map(md.utils.escapeHtml);
+    for (const h of headings) {
+      if (h.line >= 0 && h.line < lines.length) lines[h.line] = '<span id="' + h.id + '">' + lines[h.line] + '</span>';
+    }
+    return '<pre class="raw-source"><code>' + lines.join('\n') + '</code></pre>';
+  }
 
   // Task lists: "- [ ] item" / "- [x] item".
   md.core.ruler.after('inline', 'task_lists', function (state) {
@@ -75,15 +102,22 @@
   let mode = 'preview';   // 'preview' | 'raw'
   const content = document.getElementById('content');
 
+  // Returns the outline as JSON so Swift can fill the sidebar.
   window.render = function (source, base) {
     lastSource = source;
     if (base !== undefined) document.querySelector('base').href = base;   // relative images/links
+    const headings = outline(source);
     content.classList.toggle('raw', mode === 'raw');
-    content.innerHTML = mode === 'raw'
-      ? '<pre class="raw-source"><code>' + md.utils.escapeHtml(source) + '</code></pre>'
-      : md.render(source, { slugs: {} });
+    content.innerHTML = mode === 'raw' ? rawHtml(source, headings) : md.render(source, { slugs: {} });
     renderDiagrams();
     refreshFind();
+    return JSON.stringify(headings);
+  };
+
+  window.scrollToHeading = function (id) {
+    const target = document.getElementById(id);
+    if (target) target.scrollIntoView({ block: 'start' });
+    return !!target;
   };
 
   // Swift toggles between the rendered preview and the raw Markdown source.

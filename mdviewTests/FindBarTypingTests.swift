@@ -12,7 +12,7 @@ final class FindBarTypingTests: XCTestCase {
                               styleMask: [.titled], backing: .buffered, defer: false)
         let viewer: ViewerView
         if hosting {
-            window.contentView = NSHostingView(rootView: MarkdownWebView(text: "hello world", baseURL: nil, showRaw: false))
+            window.contentView = NSHostingView(rootView: MarkdownWebView(text: "hello world", baseURL: nil, showRaw: false, scrollRequest: nil) { _ in })
             window.makeKeyAndOrderFront(nil)
             RunLoop.main.run(until: Date().addingTimeInterval(0.3))
             viewer = ViewerView.first(in: window.contentView!)!

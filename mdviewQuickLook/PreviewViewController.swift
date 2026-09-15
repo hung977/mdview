@@ -20,6 +20,6 @@ final class PreviewViewController: NSViewController, QLPreviewingController {
         webView.autoresizingMask = [.width, .height]
         view.addSubview(webView)
         self.webView = webView
-        webView.render(text) { handler(nil) }   // show the panel once the page has content
+        webView.render(text) { _ in handler(nil) }   // show the panel once the page has content
     }
 }

@@ -17,7 +17,7 @@ The project file is generated from `project.yml` with [xcodegen](https://github.
 - `open -a mdview README.md`, or
 - drag a file onto the window or Dock icon, or `File → Open…`.
 
-⌘F opens a native find bar, the toolbar button switches to the raw Markdown source, text is selectable and copyable, links open in your browser, dark mode follows the system.
+The sidebar lists the document's headings (click to jump), ⌘F opens a native find bar, the toolbar button switches to the raw Markdown source, text is selectable and copyable, links open in your browser, dark mode follows the system.
 
 Rendering matches GitHub: tables, task lists, syntax-highlighted code, Mermaid diagrams, autolinked URLs, clickable tables of contents, local and remote images.
 
@@ -27,7 +27,7 @@ Requires macOS 14. No Swift package dependencies; the renderer is a bundled web 
 
     mdview/
     ├── MDViewApp.swift            DocumentGroup(viewing:) + Find menu
-    ├── ContentView.swift          SwiftUI shell, native find bar, raw toggle, drop target
+    ├── ContentView.swift          NavigationSplitView (outline sidebar + viewer), native find bar, raw toggle, drop target
     ├── Viewer.swift               ViewerWebView (WKWebView) + Page — shared with the Quick Look extension
     ├── Document.swift             FileDocument + FileWatcher (live reload)
     ├── Resources/

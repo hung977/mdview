@@ -8,6 +8,9 @@ struct ContentView: View {
     @State private var text: String
     @State private var watcher: FileWatcher?
     @State private var showRaw = false
+    @State private var outline: [Heading] = []
+    @State private var selectedHeading: Heading.ID?
+    @State private var scrollRequest: ScrollRequest?
 
     init(document: MarkdownDocument, fileURL: URL?) {
         self.document = document
@@ -16,31 +19,53 @@ struct ContentView: View {
     }
 
     var body: some View {
-        MarkdownWebView(text: text, baseURL: fileURL?.deletingLastPathComponent(), showRaw: showRaw)
-            .toolbar {
-                ToolbarItem {
-                    Toggle(isOn: $showRaw) {
-                        Label("Raw", systemImage: "doc.plaintext")
-                    }
-                    .toggleStyle(.button)
-                    .help(showRaw ? "Show rendered preview" : "Show raw Markdown")
+        NavigationSplitView {
+            List(outline, selection: $selectedHeading) { heading in
+                Text(heading.text)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .font(heading.level <= 1 ? .body.weight(.semibold) : .body)
+                    .padding(.leading, CGFloat(max(0, heading.level - 1)) * 12)
+            }
+            .listStyle(.sidebar)
+            .navigationSplitViewColumnWidth(min: 180, ideal: 240, max: 420)
+            .overlay {
+                if outline.isEmpty {
+                    Text("No Headings").foregroundStyle(.secondary)
                 }
             }
-            .onAppear {
-                guard watcher == nil, let fileURL else { return }
-                watcher = FileWatcher(url: fileURL) { reload(from: fileURL) }
-            }
-            .onDrop(of: [.fileURL], isTargeted: nil) { providers in
-                for provider in providers {
-                    _ = provider.loadObject(ofClass: URL.self) { url, _ in
-                        guard let url, ["md", "markdown"].contains(url.pathExtension.lowercased()) else { return }
-                        DispatchQueue.main.async {
-                            NSDocumentController.shared.openDocument(withContentsOf: url, display: true) { _, _, _ in }
+        } detail: {
+            MarkdownWebView(text: text, baseURL: fileURL?.deletingLastPathComponent(), showRaw: showRaw,
+                            scrollRequest: scrollRequest) { outline = $0 }
+                .toolbar {
+                    ToolbarItem {
+                        Toggle(isOn: $showRaw) {
+                            Label("Raw", systemImage: "doc.plaintext")
                         }
+                        .toggleStyle(.button)
+                        .help(showRaw ? "Show rendered preview" : "Show raw Markdown")
                     }
                 }
-                return true
+        }
+        .onChange(of: selectedHeading) { _, id in
+            guard let id else { return }
+            scrollRequest = ScrollRequest(id: id)
+        }
+        .onAppear {
+            guard watcher == nil, let fileURL else { return }
+            watcher = FileWatcher(url: fileURL) { reload(from: fileURL) }
+        }
+        .onDrop(of: [.fileURL], isTargeted: nil) { providers in
+            for provider in providers {
+                _ = provider.loadObject(ofClass: URL.self) { url, _ in
+                    guard let url, ["md", "markdown"].contains(url.pathExtension.lowercased()) else { return }
+                    DispatchQueue.main.async {
+                        NSDocumentController.shared.openDocument(withContentsOf: url, display: true) { _, _, _ in }
+                    }
+                }
             }
+            return true
+        }
     }
 
     private func reload(from url: URL) {
@@ -49,17 +74,27 @@ struct ContentView: View {
     }
 }
 
+/// A sidebar click; a fresh value each time so re-selecting after scrolling away works too.
+struct ScrollRequest: Equatable {
+    let id: Heading.ID
+    let token = UUID()
+}
+
 // MARK: - WebKit host
 
 struct MarkdownWebView: NSViewRepresentable {
     let text: String
     let baseURL: URL?
     let showRaw: Bool
+    let scrollRequest: ScrollRequest?
+    let onOutline: ([Heading]) -> Void
 
     final class Coordinator {
         var lastText: String?
         var lastShowRaw = false
+        var lastScrollRequest: ScrollRequest?
     }
+
     func makeCoordinator() -> Coordinator { Coordinator() }
 
     func makeNSView(context: Context) -> ViewerView {
@@ -67,13 +102,19 @@ struct MarkdownWebView: NSViewRepresentable {
     }
 
     func updateNSView(_ viewer: ViewerView, context: Context) {
-        if context.coordinator.lastShowRaw != showRaw {
-            context.coordinator.lastShowRaw = showRaw
+        let coordinator = context.coordinator
+        if coordinator.lastShowRaw != showRaw {
+            coordinator.lastShowRaw = showRaw
             viewer.webView.setMode(raw: showRaw)
         }
-        if context.coordinator.lastText != text {
-            context.coordinator.lastText = text
-            viewer.webView.render(text)
+        if coordinator.lastText != text {
+            coordinator.lastText = text
+            let onOutline = onOutline
+            viewer.webView.render(text) { outline in DispatchQueue.main.async { onOutline(outline) } }
+        }
+        if coordinator.lastScrollRequest != scrollRequest, let scrollRequest {
+            coordinator.lastScrollRequest = scrollRequest
+            viewer.webView.scrollToHeading(scrollRequest.id)
         }
     }
 }
