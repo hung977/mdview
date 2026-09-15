@@ -47,3 +47,7 @@ Requires macOS 15 (Liquid Glass toolbar groups on macOS 26). No Swift package de
     ├── Assets.xcassets            app icon
     └── Sample.md                  element gallery for manual testing
     mdviewQuickLook/               Quick Look preview extension (sandboxed; reuses Viewer.swift + Resources)
+
+## License
+
+MIT — see [LICENSE](LICENSE). Bundled third-party code keeps its own MIT licenses: markdown-it, highlight.js, mermaid, github-markdown-css.
