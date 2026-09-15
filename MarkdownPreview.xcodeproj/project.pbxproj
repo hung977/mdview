@@ -13,6 +13,7 @@
 		821EC30ED9E3F983AC6EA5EA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D315D0F800852696238D5FC8 /* ContentView.swift */; };
 		9C04FB1B8D955066967427D6 /* FileWatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B8181E9082DB6275192D1A /* FileWatcherTests.swift */; };
 		CA4E604CF46EA056186AE168 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D52EF8DD62C052E6CAF7A21 /* Document.swift */; };
+		D3DB60B42DEDF64C61168495 /* FindBarTypingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F8742D589CFB883229BC610 /* FindBarTypingTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,6 +27,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2F8742D589CFB883229BC610 /* FindBarTypingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindBarTypingTests.swift; sourceTree = "<group>"; };
 		43BF42893E2BEA5F39FD4C1F /* Resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Resources; path = MarkdownPreview/Resources; sourceTree = SOURCE_ROOT; };
 		4D52EF8DD62C052E6CAF7A21 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
 		53AA36B22B3BAEE1EF87FE85 /* MarkdownPreviewTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MarkdownPreviewTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -42,6 +44,7 @@
 			isa = PBXGroup;
 			children = (
 				F2B8181E9082DB6275192D1A /* FileWatcherTests.swift */,
+				2F8742D589CFB883229BC610 /* FindBarTypingTests.swift */,
 				92F5066014923F2EE89C021D /* ViewerWebViewTests.swift */,
 			);
 			path = MarkdownPreviewTests;
@@ -172,6 +175,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9C04FB1B8D955066967427D6 /* FileWatcherTests.swift in Sources */,
+				D3DB60B42DEDF64C61168495 /* FindBarTypingTests.swift in Sources */,
 				0EC6164F2BD32A9E667217BD /* ViewerWebViewTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

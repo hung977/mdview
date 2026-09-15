@@ -79,7 +79,7 @@
     if (base !== undefined) document.querySelector('base').href = base;   // relative images/links
     content.innerHTML = md.render(source, { slugs: {} });
     renderDiagrams();
-    if (findVisible()) updateFindCount();
+    refreshFind();
   };
 
   function renderDiagrams() {
@@ -110,47 +110,87 @@
     if (lastSource !== null && content.querySelector('pre.mermaid, svg[id^="mermaid"]')) render(lastSource);
   });
 
-  // ---- Find bar (window.find highlights matches through the native selection) ----
+  // ---- Find bar ----
+  // Matches are located in #content and painted with the CSS Custom Highlight API, so the
+  // search field keeps focus and the page selection is never touched.
   const bar = document.getElementById('findbar');
   const input = document.getElementById('findinput');
   const count = document.getElementById('findcount');
+  const highlightsSupported = typeof CSS !== 'undefined' && CSS.highlights && typeof Highlight === 'function';
+  let matches = [];
+  let current = -1;
 
   function findVisible() { return !bar.hidden; }
 
-  function updateFindCount() {
-    const q = input.value;
-    if (!q) { count.textContent = ''; return; }
-    const haystack = content.innerText.toLowerCase();
-    let n = 0, pos = 0;
-    const needle = q.toLowerCase();
-    while ((pos = haystack.indexOf(needle, pos)) !== -1) { n++; pos += needle.length; }
-    count.textContent = n === 0 ? 'Not found' : n + (n === 1 ? ' match' : ' matches');
+  function collectMatches(query) {
+    matches = [];
+    if (!query) return;
+    const needle = query.toLowerCase();
+    const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      const text = node.data.toLowerCase();
+      if (text.length !== node.data.length) continue;   // case mapping changed length; skip rather than mis-offset
+      let index = 0;
+      while ((index = text.indexOf(needle, index)) !== -1) {
+        const range = new Range();
+        range.setStart(node, index);
+        range.setEnd(node, index + needle.length);
+        matches.push(range);
+        index += needle.length;
+      }
+    }
   }
 
-  function find(backwards, fromStart) {
-    const q = input.value;
-    if (!q) return;
-    if (fromStart) getSelection().removeAllRanges();
-    window.find(q, false, backwards, true, false, false, false);
+  function paint() {
+    if (!highlightsSupported) return;
+    CSS.highlights.set('find-match', new Highlight(...matches));
+    if (current >= 0) CSS.highlights.set('find-current', new Highlight(matches[current]));
+    else CSS.highlights.delete('find-current');
+  }
+
+  function clearMatches() {
+    matches = [];
+    current = -1;
+    if (highlightsSupported) { CSS.highlights.delete('find-match'); CSS.highlights.delete('find-current'); }
+    count.textContent = '';
+  }
+
+  function goTo(index) {
+    if (!matches.length) { count.textContent = input.value ? 'Not found' : ''; current = -1; paint(); return; }
+    current = ((index % matches.length) + matches.length) % matches.length;
+    paint();
+    count.textContent = (current + 1) + ' of ' + matches.length;
+    const rect = matches[current].getBoundingClientRect();
+    const barHeight = bar.getBoundingClientRect().height;
+    if (rect.top < barHeight || rect.bottom > innerHeight) {
+      scrollTo({ top: scrollY + rect.top - innerHeight / 2, behavior: 'auto' });
+    }
+  }
+
+  function search() {
+    collectMatches(input.value);
+    goTo(0);
   }
 
   window.showFind = function () {
     bar.hidden = false;
     input.focus();
     input.select();
-    updateFindCount();
+    if (input.value) search();
   };
-  window.findNext = function () { if (findVisible()) find(false, false); else showFind(); };
-  window.findPrevious = function () { if (findVisible()) find(true, false); else showFind(); };
-  window.hideFind = function () { bar.hidden = true; input.blur(); };
+  window.findNext = function () { if (findVisible() && matches.length) goTo(current + 1); else showFind(); };
+  window.findPrevious = function () { if (findVisible() && matches.length) goTo(current - 1); else showFind(); };
+  window.hideFind = function () { bar.hidden = true; clearMatches(); input.blur(); };
+  window.refreshFind = function () { if (findVisible()) search(); else clearMatches(); };
 
-  input.addEventListener('input', () => { updateFindCount(); find(false, true); });
+  input.addEventListener('input', search);
   input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') { find(e.shiftKey, false); e.preventDefault(); }
+    if (e.key === 'Enter') { e.shiftKey ? findPrevious() : findNext(); e.preventDefault(); }
     else if (e.key === 'Escape') { hideFind(); e.preventDefault(); }
   });
-  document.getElementById('findnext').addEventListener('click', () => find(false, false));
-  document.getElementById('findprev').addEventListener('click', () => find(true, false));
+  document.getElementById('findnext').addEventListener('click', findNext);
+  document.getElementById('findprev').addEventListener('click', findPrevious);
   document.getElementById('finddone').addEventListener('click', hideFind);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && findVisible()) hideFind(); });
 })();

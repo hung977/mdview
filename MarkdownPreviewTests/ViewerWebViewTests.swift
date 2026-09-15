@@ -87,10 +87,19 @@ final class ViewerWebViewTests: XCTestCase {
         expectTrue("window.__pwned === undefined")
     }
 
-    func testWindowFindLocatesText() {
-        webView.render("alpha beta gamma")
+    func testFindBarCountsAndHighlightsMatchesWithoutTouchingSelection() {
+        webView.render("alpha beta gamma beta")
         expectTrue("document.querySelector('#content').textContent.includes('gamma')")
-        expectTrue("window.find('gamma', false, false, true)")
+        webView.showFind(nil)
+        expectTrue("document.activeElement && document.activeElement.id === 'findinput'")
+        expectTrue("(function(){ const i = document.getElementById('findinput'); i.value = 'beta'; i.dispatchEvent(new Event('input')); return true; })()")
+        expectTrue("document.getElementById('findcount').textContent === '1 of 2'")
+        expectTrue("CSS.highlights.get('find-match').size === 2 && CSS.highlights.get('find-current').size === 1")
+        expectTrue("document.activeElement.id === 'findinput' && getSelection().rangeCount <= 1")
+        webView.findNext(nil)
+        expectTrue("document.getElementById('findcount').textContent === '2 of 2'")
+        expectTrue("(function(){ const i = document.getElementById('findinput'); i.value = 'zzz'; i.dispatchEvent(new Event('input')); return true; })()")
+        expectTrue("document.getElementById('findcount').textContent === 'Not found'")
     }
 
     func testRerenderKeepsSinglePageAndUpdatesContent() {
