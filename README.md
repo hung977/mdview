@@ -2,11 +2,22 @@
 
 A tiny native macOS viewer for `.md` / `.markdown` files. Double-click a Markdown file, see it rendered. Live-reloads when the file changes on disk.
 
+## Install
+
+Download `mdview-<version>.zip` from the [Releases](https://github.com/hung977/mdview/releases) page, unzip, and move `mdview.app` to `/Applications`. The build is ad-hoc signed (not notarized), so the first launch needs one of:
+
+    xattr -dr com.apple.quarantine /Applications/mdview.app
+
+or right-click → Open. Launch it once so macOS registers the Quick Look extension.
+
 ## Build
 
-Open `mdview.xcodeproj` in Xcode 16+ and run, or:
+Open `mdview.xcodeproj` in Xcode 26 and run, or use the Makefile:
 
-    xcodebuild -project mdview.xcodeproj -scheme mdview -destination 'platform=macOS' -derivedDataPath build build
+    make            # Debug build
+    make test       # unit tests
+    make release    # Release build → dist/mdview.app + dist/mdview-<version>.zip
+    make install    # copy the Release build to /Applications and register Quick Look
 
 The project file is generated from `project.yml` with [xcodegen](https://github.com/yonaskolb/XcodeGen) (`xcodegen generate`); regenerate it if you add files.
 
