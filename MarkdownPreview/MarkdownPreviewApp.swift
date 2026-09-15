@@ -8,20 +8,22 @@ struct MarkdownPreviewApp: App {
         }
         .defaultSize(width: 800, height: 900)
         .commands {
-            // SwiftUI's default Edit menu has no Find items; these drive NSTextView's native find bar.
+            // SwiftUI's default Edit menu has no Find items; these drive the page's find bar.
             CommandGroup(after: .pasteboard) {
                 Menu("Find") {
-                    Button("Find…") { performFind(.showFindInterface) }.keyboardShortcut("f")
-                    Button("Find Next") { performFind(.nextMatch) }.keyboardShortcut("g")
-                    Button("Find Previous") { performFind(.previousMatch) }.keyboardShortcut("g", modifiers: [.command, .shift])
+                    Button("Find…") { send(#selector(ViewerWebView.showFind(_:))) }.keyboardShortcut("f")
+                    Button("Find Next") { send(#selector(ViewerWebView.findNext(_:))) }.keyboardShortcut("g")
+                    Button("Find Previous") { send(#selector(ViewerWebView.findPrevious(_:))) }
+                        .keyboardShortcut("g", modifiers: [.command, .shift])
                 }
             }
         }
     }
 
-    private func performFind(_ action: NSTextFinder.Action) {
-        let sender = NSMenuItem()
-        sender.tag = action.rawValue
-        NSApp.sendAction(#selector(NSTextView.performFindPanelAction(_:)), to: nil, from: sender)
+    private func send(_ action: Selector) {
+        // The web view is not always first responder (e.g. before the first click), so target it directly.
+        guard let window = NSApp.keyWindow ?? NSApp.mainWindow,
+              let webView = window.contentView.flatMap(ViewerWebView.first(in:)) else { return }
+        webView.perform(action, with: nil)
     }
 }

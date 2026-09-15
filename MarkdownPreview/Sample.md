@@ -1,5 +1,12 @@
 # Markdown Preview Sample
 
+- [Lists](#lists)
+- [Code](#code)
+- [Diagram](#diagram)
+- [Table](#table)
+
+Bare URL autolink: https://developer.apple.com and www.example.com.
+
 A paragraph with **bold**, *italic*, ~~strikethrough~~, `inline code`, and a [link to Apple](https://www.apple.com).
 Soft-wrapped line continues here.  
 Hard break above this line.
@@ -52,6 +59,16 @@ def add(a, b):
 
 ```
 plain block without language
+```
+
+## Diagram
+
+```mermaid
+flowchart LR
+  A[Finder] -->|double-click| B(Markdown Preview)
+  B --> C{Renders?}
+  C -->|yes| D[Read]
+  C -->|no| E[Fix]
 ```
 
 ## Table

@@ -7,13 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0EC6164F2BD32A9E667217BD /* ViewerWebViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92F5066014923F2EE89C021D /* ViewerWebViewTests.swift */; };
+		3126CABEBF92E42BEC965235 /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = 43BF42893E2BEA5F39FD4C1F /* Resources */; };
 		5B525EB6B227AF2D4134E0B7 /* MarkdownPreviewApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E66AA3A801406C7769500BB0 /* MarkdownPreviewApp.swift */; };
 		821EC30ED9E3F983AC6EA5EA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D315D0F800852696238D5FC8 /* ContentView.swift */; };
 		9C04FB1B8D955066967427D6 /* FileWatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B8181E9082DB6275192D1A /* FileWatcherTests.swift */; };
-		C11C402B9DF0A5733CA4F1B3 /* MarkdownRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFAB3ECACD8A98D20435875 /* MarkdownRendererTests.swift */; };
 		CA4E604CF46EA056186AE168 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D52EF8DD62C052E6CAF7A21 /* Document.swift */; };
-		E6040920FB3FAEB7D22A8F89 /* MarkdownRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB79CF4C244B04999F059583 /* MarkdownRenderer.swift */; };
-		FCF72795EE7BDBFB0AE3CDF1 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 850CD474D712DD03369F9BDC /* Markdown */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,34 +26,23 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		43BF42893E2BEA5F39FD4C1F /* Resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Resources; path = MarkdownPreview/Resources; sourceTree = SOURCE_ROOT; };
 		4D52EF8DD62C052E6CAF7A21 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
 		53AA36B22B3BAEE1EF87FE85 /* MarkdownPreviewTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MarkdownPreviewTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		92F5066014923F2EE89C021D /* ViewerWebViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewerWebViewTests.swift; sourceTree = "<group>"; };
 		C04FE5DDB7D28E26AC478A2F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		D315D0F800852696238D5FC8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		E66AA3A801406C7769500BB0 /* MarkdownPreviewApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownPreviewApp.swift; sourceTree = "<group>"; };
 		EF01C261A670CA7E6635B4FC /* MarkdownPreview.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MarkdownPreview.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F2B8181E9082DB6275192D1A /* FileWatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWatcherTests.swift; sourceTree = "<group>"; };
-		FB79CF4C244B04999F059583 /* MarkdownRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownRenderer.swift; sourceTree = "<group>"; };
-		FCFAB3ECACD8A98D20435875 /* MarkdownRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownRendererTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFrameworksBuildPhase section */
-		67454E92D3D2ACE545FDC995 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				FCF72795EE7BDBFB0AE3CDF1 /* Markdown in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		23F84EA2027E3462E569C601 /* MarkdownPreviewTests */ = {
 			isa = PBXGroup;
 			children = (
 				F2B8181E9082DB6275192D1A /* FileWatcherTests.swift */,
-				FCFAB3ECACD8A98D20435875 /* MarkdownRendererTests.swift */,
+				92F5066014923F2EE89C021D /* ViewerWebViewTests.swift */,
 			);
 			path = MarkdownPreviewTests;
 			sourceTree = "<group>";
@@ -66,7 +54,7 @@
 				4D52EF8DD62C052E6CAF7A21 /* Document.swift */,
 				C04FE5DDB7D28E26AC478A2F /* Info.plist */,
 				E66AA3A801406C7769500BB0 /* MarkdownPreviewApp.swift */,
-				FB79CF4C244B04999F059583 /* MarkdownRenderer.swift */,
+				43BF42893E2BEA5F39FD4C1F /* Resources */,
 			);
 			path = MarkdownPreview;
 			sourceTree = "<group>";
@@ -115,7 +103,7 @@
 			buildConfigurationList = D0523671E48994611970C679 /* Build configuration list for PBXNativeTarget "MarkdownPreview" */;
 			buildPhases = (
 				CB4C60909DCC9F68968744E6 /* Sources */,
-				67454E92D3D2ACE545FDC995 /* Frameworks */,
+				F28DAEEA34396B14F9D20BF2 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -123,7 +111,6 @@
 			);
 			name = MarkdownPreview;
 			packageProductDependencies = (
-				850CD474D712DD03369F9BDC /* Markdown */,
 			);
 			productName = MarkdownPreview;
 			productReference = EF01C261A670CA7E6635B4FC /* MarkdownPreview.app */;
@@ -157,9 +144,6 @@
 			);
 			mainGroup = C0F59247730347C0D1E7382A;
 			minimizedProjectReferenceProxies = 1;
-			packageReferences = (
-				266FC71B4BA971190870315B /* XCRemoteSwiftPackageReference "swift-markdown" */,
-			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6588DC80A5B6A6E341F5FB93 /* Products */;
 			projectDirPath = "";
@@ -171,13 +155,24 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		F28DAEEA34396B14F9D20BF2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3126CABEBF92E42BEC965235 /* Resources in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		22FB1F94D0386D9F69C4DCF3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				9C04FB1B8D955066967427D6 /* FileWatcherTests.swift in Sources */,
-				C11C402B9DF0A5733CA4F1B3 /* MarkdownRendererTests.swift in Sources */,
+				0EC6164F2BD32A9E667217BD /* ViewerWebViewTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -188,7 +183,6 @@
 				821EC30ED9E3F983AC6EA5EA /* ContentView.swift in Sources */,
 				CA4E604CF46EA056186AE168 /* Document.swift in Sources */,
 				5B525EB6B227AF2D4134E0B7 /* MarkdownPreviewApp.swift in Sources */,
-				E6040920FB3FAEB7D22A8F89 /* MarkdownRenderer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -435,25 +429,6 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		266FC71B4BA971190870315B /* XCRemoteSwiftPackageReference "swift-markdown" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/apple/swift-markdown";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.5.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		850CD474D712DD03369F9BDC /* Markdown */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 266FC71B4BA971190870315B /* XCRemoteSwiftPackageReference "swift-markdown" */;
-			productName = Markdown;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B55EE093A36A763C3395AE1A /* Project object */;
 }

@@ -18,13 +18,17 @@ The project file is generated from `project.yml` with [xcodegen](https://github.
 
 ⌘F finds, text is selectable and copyable, links open in your browser, dark mode follows the system.
 
-Requires macOS 14. One dependency: [swift-markdown](https://github.com/apple/swift-markdown).
+Rendering matches GitHub: tables, task lists, syntax-highlighted code, Mermaid diagrams, autolinked URLs, clickable tables of contents, local and remote images.
+
+Requires macOS 14. No Swift package dependencies; the renderer is a bundled web page using [markdown-it](https://github.com/markdown-it/markdown-it), [highlight.js](https://highlightjs.org), [mermaid](https://mermaid.js.org) and [github-markdown-css](https://github.com/sindresorhus/github-markdown-css) (all vendored under `MarkdownPreview/Resources/vendor`, no network access needed).
 
 ## Layout
 
     MarkdownPreview/
     ├── MarkdownPreviewApp.swift   DocumentGroup(viewing:) + Find menu
-    ├── ContentView.swift          NSTextView (TextKit 1) host, centred column, drop target
-    ├── MarkdownRenderer.swift     swift-markdown AST → NSAttributedString (tables, code, images…)
+    ├── ContentView.swift          WKWebView host (ViewerWebView), link handling, drop target
     ├── Document.swift             FileDocument + FileWatcher (live reload)
+    ├── Resources/
+    │   ├── viewer.html/.css/.js   the page: markdown-it setup, task lists, heading ids, find bar
+    │   └── vendor/                markdown-it, highlight.js, mermaid, github-markdown-css
     └── Sample.md                  element gallery for manual testing

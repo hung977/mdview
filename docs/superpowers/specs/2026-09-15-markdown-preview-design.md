@@ -91,3 +91,32 @@ All colours are semantic `NSColor`s, so light/dark mode resolve at draw time and
 ## Out of scope
 
 Editing, preferences, custom windows/toolbar, remote-image caching, per-language grammars, TextKit 2, HTML rendering, math, footnotes styling beyond plain text, printing.
+
+---
+
+## Revision 2 (2026-09-15): WKWebView engine
+
+After using the TextKit build on real documents the user rejected it (tables did not reflow with the
+window, bare URLs and table-of-contents anchors were not links, no diagrams, rendering visibly worse
+than GitHub). The engine was replaced; everything outside the rendering box is unchanged.
+
+- **Engine:** `WKWebView` hosting a bundled page — `markdown-it` 14.1 (GFM + `linkify`, own rules for
+  task lists and GitHub-style heading ids), `highlight.js` 11.11 (common languages),
+  `mermaid` 11.12 (injected lazily only when the document has a ```` ```mermaid ```` fence),
+  `github-markdown-css` 5.8 (light/dark via `prefers-color-scheme`). All vendored under
+  `MarkdownPreview/Resources/vendor`; no network needed. `swift-markdown` dependency removed.
+- **Page lifecycle:** the shell (`viewer.html` + inlined CSS/JS) is written once per process to a temp
+  file and loaded with `loadFileURL(_:allowingReadAccessTo: "/")` so images next to the document load;
+  a `<base href>` is set per document. Re-renders call `render(text, base)` in JS and replace
+  `#content` in place, so live reload keeps the scroll position.
+- **Security:** CSP with a per-process script nonce — HTML embedded in a Markdown file cannot run
+  scripts or inline handlers; only images/fonts may be fetched.
+- **Find:** in-page find bar (`window.find`) driven by Edit ▸ Find (⌘F / ⌘G / ⇧⌘G), which targets the
+  `ViewerWebView` in the key window.
+- **Links:** in-page `#anchors` scroll via JS; `.md`/`.markdown` file links open in the app; anything
+  else goes to `NSWorkspace`.
+- **Layout:** `.markdown-body` centred, max-width 920 px, reflows with the window.
+- **Files:** `MarkdownPreviewApp.swift`, `Document.swift`, `ContentView.swift` (ContentView,
+  `MarkdownWebView`, `ViewerWebView`, `Page`), `Resources/`. `MarkdownRenderer.swift` deleted.
+- **Tests:** `ViewerWebViewTests` render through the real page and assert on the DOM; `FileWatcherTests` unchanged.
+- **Cost:** one extra WebContent process (~140 MB on an 86 KB, 428-row document); window still appears in ~0.4 s.

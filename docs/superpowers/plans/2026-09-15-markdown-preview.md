@@ -8,6 +8,11 @@
 
 **Tech Stack:** Swift 5, SwiftUI + AppKit, macOS 14+, `apple/swift-markdown` (only dependency), XCTest, `xcodegen` to generate the `.xcodeproj`.
 
+> **Status (2026-09-15, later the same day):** Tasks 1–9 were executed and verified. The user then
+> rejected the TextKit renderer on real documents; Tasks 2–7 were superseded by the WKWebView engine
+> described in *Revision 2* of the spec (`docs/superpowers/specs/2026-09-15-markdown-preview-design.md`).
+> Tasks 1, 8 and 9 (scaffold, live reload, drag & drop / association) still describe the shipped code.
+
 ## Global Constraints
 
 - Deployment target **macOS 14.0**; Swift language mode **5**.
