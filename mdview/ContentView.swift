@@ -1,5 +1,5 @@
 import SwiftUI
-import WebKit
+import AppKit
 import UniformTypeIdentifiers
 
 struct ContentView: View {
@@ -8,9 +8,13 @@ struct ContentView: View {
     @State private var text: String
     @State private var watcher: FileWatcher?
     @State private var showRaw = false
+    @State private var showInfo = false
     @State private var outline: [Heading] = []
     @State private var selectedHeading: Heading.ID?
     @State private var scrollRequest: ScrollRequest?
+    @State private var query = ""
+    @FocusState private var searchFocused: Bool
+    @State private var findStatus = ""
 
     init(document: MarkdownDocument, fileURL: URL?) {
         self.document = document
@@ -36,22 +40,19 @@ struct ContentView: View {
             }
         } detail: {
             MarkdownWebView(text: text, baseURL: fileURL?.deletingLastPathComponent(), showRaw: showRaw,
-                            scrollRequest: scrollRequest) { outline = $0 }
+                            scrollRequest: scrollRequest, query: query,
+                            onOutline: { outline = $0 }, onFindStatus: { findStatus = $0 })
                 .ignoresSafeArea(.container, edges: .top)   // page scrolls under the glass toolbar
-                .toolbar {
-                    ToolbarItem {
-                        Toggle(isOn: $showRaw) {
-                            Label("Raw", systemImage: "doc.plaintext")
-                        }
-                        .toggleStyle(.button)
-                        .help(showRaw ? "Show rendered preview" : "Show raw Markdown")
-                    }
-                }
+                .toolbar { toolbarItems }
+                .searchable(text: $query, placement: .toolbar, prompt: "Search")
+                .searchFocused($searchFocused)
+                .onSubmit(of: .search) { ViewerView.inKeyWindow()?.findNext(nil) }
         }
         .onChange(of: selectedHeading) { _, id in
             guard let id else { return }
             scrollRequest = ScrollRequest(id: id)
         }
+        .onReceive(NotificationCenter.default.publisher(for: .mdviewFocusSearch)) { _ in searchFocused = true }
         .onAppear {
             guard watcher == nil, let fileURL else { return }
             watcher = FileWatcher(url: fileURL) { reload(from: fileURL) }
@@ -69,9 +70,86 @@ struct ContentView: View {
         }
     }
 
+    // Preview.app-style groups: zoom | raw | find results | info · share | search field.
+    @ToolbarContentBuilder
+    private var toolbarItems: some ToolbarContent {
+        ToolbarItemGroup {
+            Button { ViewerView.inKeyWindow()?.zoomOut(nil) } label: { Label("Zoom Out", systemImage: "minus.magnifyingglass") }
+            Button { ViewerView.inKeyWindow()?.actualSize(nil) } label: { Label("Actual Size", systemImage: "1.magnifyingglass") }
+            Button { ViewerView.inKeyWindow()?.zoomIn(nil) } label: { Label("Zoom In", systemImage: "plus.magnifyingglass") }
+        }
+        if #available(macOS 26, *) { ToolbarSpacer(.fixed) }
+        ToolbarItem {
+            Toggle(isOn: $showRaw) { Label("Raw", systemImage: "doc.plaintext") }
+                .toggleStyle(.button)
+                .help(showRaw ? "Show rendered preview" : "Show raw Markdown")
+        }
+        if !query.isEmpty {
+            if #available(macOS 26, *) { ToolbarSpacer(.fixed) }
+            ToolbarItemGroup {
+                Text(findStatus).foregroundStyle(.secondary).monospacedDigit()
+                Button { ViewerView.inKeyWindow()?.findPrevious(nil) } label: { Label("Previous Match", systemImage: "chevron.up") }
+                Button { ViewerView.inKeyWindow()?.findNext(nil) } label: { Label("Next Match", systemImage: "chevron.down") }
+            }
+        }
+        if #available(macOS 26, *) { ToolbarSpacer(.fixed) }
+        ToolbarItemGroup {
+            Button { showInfo.toggle() } label: { Label("Info", systemImage: "info") }
+                .popover(isPresented: $showInfo, arrowEdge: .bottom) {
+                    FileInfoView(fileURL: fileURL, text: text, headings: outline.count)
+                }
+            if let fileURL {
+                ShareLink(item: fileURL) { Label("Share", systemImage: "square.and.arrow.up") }
+            }
+        }
+    }
+
     private func reload(from url: URL) {
         guard let data = try? Data(contentsOf: url) else { return }   // mid-save; next event re-reads
         text = MarkdownDocument.decode(data)
+    }
+}
+
+extension Notification.Name {
+    static let mdviewFocusSearch = Notification.Name("mdview.focusSearch")
+}
+
+/// The "i" popover: what Finder's Get Info shows, plus text statistics.
+struct FileInfoView: View {
+    let fileURL: URL?
+    let text: String
+    let headings: Int
+
+    var body: some View {
+        let attributes = fileURL.flatMap { try? FileManager.default.attributesOfItem(atPath: $0.path) } ?? [:]
+        let words = text.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count
+        let lines = text.split(omittingEmptySubsequences: false, whereSeparator: \.isNewline).count
+        Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 12, verticalSpacing: 6) {
+            if let fileURL {
+                row("Name", fileURL.lastPathComponent)
+                row("Where", fileURL.deletingLastPathComponent().path(percentEncoded: false))
+            }
+            if let size = attributes[.size] as? Int {
+                row("Size", ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file))
+            }
+            if let modified = attributes[.modificationDate] as? Date {
+                row("Modified", modified.formatted(date: .abbreviated, time: .shortened))
+            }
+            Divider().gridCellUnsizedAxes(.horizontal)
+            row("Words", words.formatted())
+            row("Characters", text.count.formatted())
+            row("Lines", lines.formatted())
+            row("Headings", headings.formatted())
+        }
+        .padding(16)
+        .frame(minWidth: 280, maxWidth: 420)
+    }
+
+    private func row(_ label: String, _ value: String) -> some View {
+        GridRow {
+            Text(label).foregroundStyle(.secondary).gridColumnAlignment(.trailing)
+            Text(value).textSelection(.enabled).lineLimit(3)
+        }
     }
 }
 
@@ -88,12 +166,15 @@ struct MarkdownWebView: NSViewRepresentable {
     let baseURL: URL?
     let showRaw: Bool
     let scrollRequest: ScrollRequest?
+    let query: String
     let onOutline: ([Heading]) -> Void
+    let onFindStatus: (String) -> Void
 
     final class Coordinator {
         var lastText: String?
         var lastShowRaw = false
         var lastScrollRequest: ScrollRequest?
+        var lastQuery = ""
     }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -104,6 +185,8 @@ struct MarkdownWebView: NSViewRepresentable {
 
     func updateNSView(_ viewer: ViewerView, context: Context) {
         let coordinator = context.coordinator
+        let onFindStatus = onFindStatus
+        viewer.onFindStatus = { status in DispatchQueue.main.async { onFindStatus(status) } }
         if coordinator.lastShowRaw != showRaw {
             coordinator.lastShowRaw = showRaw
             viewer.webView.setMode(raw: showRaw)
@@ -117,58 +200,33 @@ struct MarkdownWebView: NSViewRepresentable {
             coordinator.lastScrollRequest = scrollRequest
             viewer.webView.scrollToHeading(scrollRequest.id)
         }
+        if coordinator.lastQuery != query {
+            coordinator.lastQuery = query
+            viewer.find(query)
+        }
     }
 }
 
-// MARK: - Viewer = native find bar + web view
+// MARK: - Viewer = web view + window-level actions (find, zoom)
 
-/// Stacks a native find bar (hidden until ⌘F) above the web view. The find actions from the
-/// Edit ▸ Find menu land here.
+/// Hosts the web view under the window's toolbar and is the target of menu/toolbar actions
+/// for the key window (`inKeyWindow()`).
 final class ViewerView: NSView {
     let webView: ViewerWebView
-    let findBar = FindBar()
-
-    private var findBarTop: NSLayoutConstraint!
+    var onFindStatus: ((String) -> Void)?
     private var lastInset: CGFloat = -1
 
     init(baseURL: URL?) {
         webView = ViewerWebView(baseURL: baseURL)
         super.init(frame: .zero)
         webView.translatesAutoresizingMaskIntoConstraints = false
-        findBar.translatesAutoresizingMaskIntoConstraints = false
         addSubview(webView)
-        addSubview(findBar)
-        findBarTop = findBar.topAnchor.constraint(equalTo: topAnchor)
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: topAnchor),
             webView.bottomAnchor.constraint(equalTo: bottomAnchor),
             webView.leadingAnchor.constraint(equalTo: leadingAnchor),
             webView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            findBarTop,
-            findBar.leadingAnchor.constraint(equalTo: leadingAnchor),
-            findBar.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
-        findBar.isHidden = true
-        findBar.onQueryChange = { [weak self] query in self?.run("findSet(\(FindBar.json(query)))") }
-        findBar.onNext = { [weak self] in self?.findNext(nil) }
-        findBar.onPrevious = { [weak self] in self?.findPrevious(nil) }
-        findBar.onDone = { [weak self] in self?.hideFind() }
-    }
-
-    /// Keeps the find bar below the toolbar and tells the page how much chrome it scrolls under.
-    override func layout() {
-        super.layout()
-        var chrome: CGFloat = 0
-        if let window {
-            let topInWindow = convert(bounds, to: nil).maxY
-            chrome = max(0, topInWindow - window.contentLayoutRect.maxY)
-        }
-        findBarTop.constant = chrome
-        let inset = chrome + (findBar.isHidden ? 0 : findBar.fittingSize.height)
-        if inset != lastInset {
-            lastInset = inset
-            webView.evaluate("setTopInset(\(inset))") { _ in }
-        }
     }
 
     @available(*, unavailable)
@@ -180,147 +238,43 @@ final class ViewerView: NSView {
         return nil
     }
 
-    @objc func showFind(_ sender: Any?) {
-        findBar.isHidden = false
-        needsLayout = true
-        window?.makeFirstResponder(findBar.field)
-        findBar.field.selectText(nil)
-        run("findSet(\(FindBar.json(findBar.field.stringValue)))")
+    static func inKeyWindow() -> ViewerView? {
+        (NSApp.keyWindow ?? NSApp.mainWindow)?.contentView.flatMap(first(in:))
     }
 
-    @objc func findNext(_ sender: Any?) {
-        if findBar.isHidden { showFind(sender) } else { run("findNext()") }
+    /// Tells the page how much window chrome (the toolbar) it scrolls underneath.
+    override func layout() {
+        super.layout()
+        var chrome: CGFloat = 0
+        if let window {
+            let topInWindow = convert(bounds, to: nil).maxY
+            chrome = max(0, topInWindow - window.contentLayoutRect.maxY)
+        }
+        if chrome != lastInset {
+            lastInset = chrome
+            webView.setTopInset(chrome)
+        }
     }
 
-    @objc func findPrevious(_ sender: Any?) {
-        if findBar.isHidden { showFind(sender) } else { run("findPrevious()") }
-    }
+    // MARK: Find
 
-    func hideFind() {
-        findBar.isHidden = true
-        needsLayout = true
-        run("findClear()")
-        window?.makeFirstResponder(webView)
-    }
+    func find(_ query: String) { run("findSet(\(json(query)))") }
+    @objc func findNext(_ sender: Any?) { run("findNext()") }
+    @objc func findPrevious(_ sender: Any?) { run("findPrevious()") }
 
-    /// Runs a find call in the page and shows the status it returns ("3 of 12", "Not found").
     private func run(_ script: String) {
-        webView.evaluate(script) { [weak self] result in
-            self?.findBar.status = result as? String ?? ""
-        }
-    }
-}
-
-/// Small-control find bar modelled on NSTextView's: search field, count, ‹ ›, Done.
-final class FindBar: NSVisualEffectView, NSSearchFieldDelegate {
-    let field = NSSearchField()
-    private let countLabel = NSTextField(labelWithString: "")
-    private let arrows = NSSegmentedControl()
-    private let doneButton = NSButton(title: "Done", target: nil, action: nil)
-
-    var onQueryChange: ((String) -> Void)?
-    var onNext: (() -> Void)?
-    var onPrevious: (() -> Void)?
-    var onDone: (() -> Void)?
-
-    var status: String = "" {
-        didSet { countLabel.stringValue = status }
+        webView.evaluate(script) { [weak self] result in self?.onFindStatus?(result as? String ?? "") }
     }
 
-    /// Typing must not reach the document's undo manager (that would mark the file "Edited").
-    private let barUndoManager = UndoManager()
-    override var undoManager: UndoManager? { barUndoManager }
-
-    init() {
-        super.init(frame: .zero)
-        material = .headerView
-        blendingMode = .withinWindow
-        state = .followsWindowActiveState
-
-        field.controlSize = .small
-        field.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
-        field.placeholderString = "Find"
-        field.sendsSearchStringImmediately = true
-        field.sendsWholeSearchString = false
-        field.delegate = self
-        field.target = self
-        field.action = #selector(queryChanged)
-        field.setContentHuggingPriority(NSLayoutConstraint.Priority(1), for: .horizontal)   // stretch to fill the bar
-
-        countLabel.controlSize = .small
-        countLabel.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
-        countLabel.textColor = .secondaryLabelColor
-        countLabel.alignment = .left
-        countLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
-        countLabel.setContentHuggingPriority(.required, for: .horizontal)
-
-        arrows.segmentCount = 2
-        arrows.trackingMode = .momentary
-        arrows.controlSize = .small
-        arrows.segmentStyle = .rounded
-        arrows.setImage(NSImage(systemSymbolName: "chevron.left", accessibilityDescription: "Previous match"), forSegment: 0)
-        arrows.setImage(NSImage(systemSymbolName: "chevron.right", accessibilityDescription: "Next match"), forSegment: 1)
-        arrows.setWidth(28, forSegment: 0)
-        arrows.setWidth(28, forSegment: 1)
-        arrows.target = self
-        arrows.action = #selector(arrowClicked)
-        arrows.setContentHuggingPriority(.required, for: .horizontal)
-
-        doneButton.controlSize = .small
-        doneButton.bezelStyle = .rounded
-        doneButton.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
-        doneButton.target = self
-        doneButton.action = #selector(doneClicked)
-        doneButton.setContentHuggingPriority(.required, for: .horizontal)
-
-        let row = NSStackView(views: [field, countLabel, arrows, doneButton])
-        row.orientation = .horizontal
-        row.alignment = .centerY
-        row.spacing = 8
-        row.edgeInsets = NSEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
-        row.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(row)
-
-        let separator = NSBox()
-        separator.boxType = .separator
-        separator.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(separator)
-
-        NSLayoutConstraint.activate([
-            row.topAnchor.constraint(equalTo: topAnchor),
-            row.leadingAnchor.constraint(equalTo: leadingAnchor),
-            row.trailingAnchor.constraint(equalTo: trailingAnchor),
-            separator.topAnchor.constraint(equalTo: row.bottomAnchor),
-            separator.leadingAnchor.constraint(equalTo: leadingAnchor),
-            separator.trailingAnchor.constraint(equalTo: trailingAnchor),
-            separator.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) { fatalError("not supported") }
-
-    @objc private func queryChanged() { onQueryChange?(field.stringValue) }
-    @objc private func arrowClicked() { arrows.selectedSegment == 0 ? onPrevious?() : onNext?() }
-    @objc private func doneClicked() { onDone?() }
-
-    // Return / Shift-Return step through matches; Escape closes the bar.
-    func control(_ control: NSControl, textView: NSTextView, doCommandBy selector: Selector) -> Bool {
-        switch selector {
-        case #selector(NSResponder.insertNewline(_:)):
-            if NSApp.currentEvent?.modifierFlags.contains(.shift) == true { onPrevious?() } else { onNext?() }
-            return true
-        case #selector(NSResponder.cancelOperation(_:)):
-            onDone?()
-            return true
-        default:
-            return false
-        }
-    }
-
-    static func json(_ string: String) -> String {
+    private func json(_ string: String) -> String {
         guard let data = try? JSONSerialization.data(withJSONObject: string, options: .fragmentsAllowed),
               let text = String(data: data, encoding: .utf8) else { return "\"\"" }
         return text
     }
+
+    // MARK: Zoom
+
+    @objc func zoomIn(_ sender: Any?) { webView.zoom *= 1.1 }
+    @objc func zoomOut(_ sender: Any?) { webView.zoom /= 1.1 }
+    @objc func actualSize(_ sender: Any?) { webView.zoom = 1 }
 }

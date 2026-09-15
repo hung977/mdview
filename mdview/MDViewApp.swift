@@ -6,25 +6,25 @@ struct MDViewApp: App {
         DocumentGroup(viewing: MarkdownDocument.self) { file in
             ContentView(document: file.document, fileURL: file.fileURL)
         }
-        .defaultSize(width: 800, height: 900)
-        .windowToolbarStyle(.unified)   // sidebar + toolbar, like Preview.app
+        .defaultSize(width: 1100, height: 900)
+        .windowToolbarStyle(.unified)   // sidebar + glass toolbar, like Preview.app
         .commands {
-            // SwiftUI's default Edit menu has no Find items; these drive the page's find bar.
+            // SwiftUI's default Edit menu has no Find items; these drive the toolbar search field.
             CommandGroup(after: .pasteboard) {
                 Menu("Find") {
-                    Button("Find…") { send(#selector(ViewerView.showFind(_:))) }.keyboardShortcut("f")
-                    Button("Find Next") { send(#selector(ViewerView.findNext(_:))) }.keyboardShortcut("g")
-                    Button("Find Previous") { send(#selector(ViewerView.findPrevious(_:))) }
+                    Button("Find…") { NotificationCenter.default.post(name: .mdviewFocusSearch, object: nil) }
+                        .keyboardShortcut("f")
+                    Button("Find Next") { ViewerView.inKeyWindow()?.findNext(nil) }.keyboardShortcut("g")
+                    Button("Find Previous") { ViewerView.inKeyWindow()?.findPrevious(nil) }
                         .keyboardShortcut("g", modifiers: [.command, .shift])
                 }
             }
+            CommandGroup(before: .sidebar) {
+                Button("Actual Size") { ViewerView.inKeyWindow()?.actualSize(nil) }.keyboardShortcut("0")
+                Button("Zoom In") { ViewerView.inKeyWindow()?.zoomIn(nil) }.keyboardShortcut("+")
+                Button("Zoom Out") { ViewerView.inKeyWindow()?.zoomOut(nil) }.keyboardShortcut("-")
+                Divider()
+            }
         }
-    }
-
-    private func send(_ action: Selector) {
-        // The web view is not always first responder (e.g. before the first click), so target it directly.
-        guard let window = NSApp.keyWindow ?? NSApp.mainWindow,
-              let viewer = window.contentView.flatMap(ViewerView.first(in:)) else { return }
-        viewer.perform(action, with: nil)
     }
 }

@@ -147,3 +147,15 @@ than GitHub). The engine was replaced; everything outside the rendering box is u
   returned by the page's `render()` — id/level/text computed with the same slug algorithm as the heading
   anchors), indented per level; selecting an entry calls `scrollToHeading(id)`. In raw mode heading
   lines are wrapped in `<span id>` so the sidebar keeps working. Toolbar style `.unified` (like Preview.app).
+
+## Revision 5 (2026-09-15): Preview-style toolbar
+
+- Toolbar groups (glass pills on macOS 26 via `ToolbarSpacer`): zoom out / actual size / zoom in
+  (`WKWebView.pageZoom`, also View menu ⌘0 ⌘+ ⌘−), Raw toggle, find results ("3 of 57" ▲▼, shown while a
+  query is active), Info (popover: name, location, size, modified, words/characters/lines/headings) and
+  Share (`ShareLink`), plus the system search field (`.searchable`, `.searchFocused` for ⌘F).
+- The AppKit find bar was removed; the page still owns matching/highlighting. Menu and toolbar actions
+  reach the key window's `ViewerView` (`inKeyWindow()`), which forwards to the page and reports status
+  back to SwiftUI. Deployment target raised to macOS 15 for `.searchFocused`.
+- The page scrolls beneath the toolbar (`ignoresSafeArea`); `ViewerView.layout()` measures the chrome from
+  `window.contentLayoutRect` and the page pads its content by `--top-inset` (divided by the zoom factor).

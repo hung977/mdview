@@ -54,6 +54,24 @@ final class ViewerWebView: WKWebView, WKNavigationDelegate {
         }
     }
 
+    /// Page zoom (⌘+ / ⌘− / ⌘0). CSS pixels scale with it, so the chrome inset is re-sent.
+    var zoom: CGFloat {
+        get { pageZoom }
+        set {
+            pageZoom = min(max(newValue, 0.5), 3)
+            sendTopInset()
+        }
+    }
+
+    private var topInset: CGFloat = 0
+    func setTopInset(_ points: CGFloat) {
+        topInset = points
+        sendTopInset()
+    }
+    private func sendTopInset() {
+        evaluate("setTopInset(\(topInset / pageZoom))") { _ in }
+    }
+
     func scrollToHeading(_ id: String) {
         guard let data = try? JSONSerialization.data(withJSONObject: id, options: .fragmentsAllowed),
               let json = String(data: data, encoding: .utf8) else { return }

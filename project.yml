@@ -2,14 +2,14 @@ name: mdview
 options:
   bundleIdPrefix: com.hungpv
   deploymentTarget:
-    macOS: "14.0"
+    macOS: "15.0"
   createIntermediateGroups: true
   generateEmptyDirectories: true
 
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    MACOSX_DEPLOYMENT_TARGET: "15.0"
     CODE_SIGN_STYLE: Manual
     CODE_SIGN_IDENTITY: "-"
     DEVELOPMENT_TEAM: ""
@@ -43,7 +43,7 @@ targets:
         CFBundleName: mdview
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "1"
-        LSMinimumSystemVersion: "14.0"
+        LSMinimumSystemVersion: "15.0"
         LSApplicationCategoryType: public.app-category.utilities
         NSPrincipalClass: NSApplication
         NSSupportsAutomaticTermination: true
@@ -86,7 +86,7 @@ targets:
         CFBundleDisplayName: mdview Quick Look
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "1"
-        LSMinimumSystemVersion: "14.0"
+        LSMinimumSystemVersion: "15.0"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
