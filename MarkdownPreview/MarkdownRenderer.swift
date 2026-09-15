@@ -251,6 +251,71 @@ struct Visitor: MarkupVisitor {
         return text
     }
 
+    // MARK: Tables
+
+    mutating func visitTable(_ table: Table) -> NSAttributedString {
+        let columns = table.maxColumnCount
+        guard columns > 0 else { return NSAttributedString() }
+
+        var rows: [[Table.Cell]] = [table.head.children.compactMap { $0 as? Table.Cell }]
+        for row in table.body.children.compactMap({ $0 as? Table.Row }) {
+            rows.append(row.children.compactMap { $0 as? Table.Cell })
+        }
+
+        let textTable = NSTextTable()
+        textTable.numberOfColumns = columns
+        textTable.collapsesBorders = true
+        textTable.setWidth(Style.spacing, type: .absoluteValueType, for: .margin, edge: .maxY)
+        let (percentages, naturalWidth) = columnPercentages(rows, columns: columns)
+        textTable.setValue(min(100, naturalWidth / Style.maxWidth * 100), type: .percentageValueType, for: .width)
+
+        let result = NSMutableAttributedString()
+        let savedAlignment = alignment
+        defer { alignment = savedAlignment }
+        for (rowIndex, row) in rows.enumerated() {
+            for column in 0 ..< columns {
+                let block = NSTextTableBlock(table: textTable, startingRow: rowIndex, rowSpan: 1,
+                                             startingColumn: column, columnSpan: 1)
+                block.setBorderColor(.separatorColor)
+                block.setWidth(1, type: .absoluteValueType, for: .border)
+                block.setWidth(6, type: .absoluteValueType, for: .padding)
+                block.setValue(percentages[column], type: .percentageValueType, for: .width)
+                if rowIndex == 0 { block.backgroundColor = Style.codeBackground }
+                blocks.append(block)
+                switch column < table.columnAlignments.count ? table.columnAlignments[column] : nil {
+                case .center: alignment = .center
+                case .right: alignment = .right
+                default: alignment = .left
+                }
+                let content: NSAttributedString
+                if column < row.count {
+                    content = rowIndex == 0
+                        ? withFont(font.adding(.bold)) { $0.visitChildren(row[column]) }
+                        : visitChildren(row[column])
+                } else {
+                    content = NSAttributedString()
+                }
+                result.append(paragraph(content, style: paragraphStyle(spacing: 0)))
+                blocks.removeLast()
+            }
+        }
+        return result
+    }
+
+    /// Natural width of each column (measured plain text + padding) as percentages of the table,
+    /// plus the table's total natural width in points.
+    private func columnPercentages(_ rows: [[Table.Cell]], columns: Int) -> ([CGFloat], CGFloat) {
+        var widths = [CGFloat](repeating: 24, count: columns)
+        for row in rows {
+            for (column, cell) in row.prefix(columns).enumerated() {
+                let measured = (cell.plainText as NSString).size(withAttributes: [.font: Style.body]).width + 16
+                widths[column] = max(widths[column], min(measured, Style.maxWidth / 2))
+            }
+        }
+        let total = widths.reduce(0, +)
+        return (widths.map { $0 / total * 100 }, total)
+    }
+
     // MARK: Inlines
 
     mutating func visitText(_ text: Text) -> NSAttributedString {

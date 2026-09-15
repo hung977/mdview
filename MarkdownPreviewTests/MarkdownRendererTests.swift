@@ -137,4 +137,32 @@ final class MarkdownRendererTests: XCTestCase {
         XCTAssertEqual(render("a<br>b<br/>c<BR />d").string, "a\u{2028}b\u{2028}c\u{2028}d\n")
         XCTAssertTrue(render("a<span>b").string.contains("<span>"))
     }
+
+    func testTableCellsAreTableBlocksWithBoldHeader() {
+        let s = render("| Name | Value |\n|:-----|------:|\n| a | 1 |\n| b | 2 |")
+        let header = location(of: "Name", in: s)
+        let cell = location(of: "b", in: s)
+        let headerBlock = paragraphStyle(s, at: header).textBlocks.first as? NSTextTableBlock
+        let cellBlock = paragraphStyle(s, at: cell).textBlocks.first as? NSTextTableBlock
+        XCTAssertNotNil(headerBlock); XCTAssertNotNil(cellBlock)
+        XCTAssertTrue(headerBlock!.table === cellBlock!.table)
+        XCTAssertEqual(headerBlock!.table.numberOfColumns, 2)
+        XCTAssertEqual(cellBlock!.startingRow, 2)
+        XCTAssertEqual(cellBlock!.startingColumn, 0)
+        XCTAssertTrue(font(s, at: header).fontDescriptor.symbolicTraits.contains(.bold))
+        XCTAssertFalse(font(s, at: cell).fontDescriptor.symbolicTraits.contains(.bold))
+        XCTAssertEqual(paragraphStyle(s, at: location(of: "2", in: s)).alignment, .right)
+        XCTAssertEqual(paragraphStyle(s, at: cell).alignment, .left)
+    }
+
+    func testTableShortRowsStillProduceEveryCell() {
+        let s = render("| a | b | c |\n|---|---|---|\n| 1 |")
+        var cells = Set<String>()
+        s.enumerateAttribute(.paragraphStyle, in: NSRange(location: 0, length: s.length)) { value, _, _ in
+            if let b = (value as? NSParagraphStyle)?.textBlocks.first as? NSTextTableBlock {
+                cells.insert("\(b.startingRow),\(b.startingColumn)")
+            }
+        }
+        XCTAssertEqual(cells.count, 6)
+    }
 }
