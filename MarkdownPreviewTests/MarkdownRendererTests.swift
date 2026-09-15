@@ -92,4 +92,49 @@ final class MarkdownRendererTests: XCTestCase {
         }
         XCTAssertTrue(found)
     }
+
+    func testInlineCodeIsMonospacedWithBackground() {
+        let s = render("use `foo` now")
+        let i = location(of: "foo", in: s)
+        XCTAssertTrue(font(s, at: i).fontDescriptor.symbolicTraits.contains(.monoSpace))
+        XCTAssertNotNil(s.attribute(.backgroundColor, at: i, effectiveRange: nil))
+        XCTAssertNil(s.attribute(.backgroundColor, at: location(of: "use", in: s), effectiveRange: nil))
+    }
+
+    func testFencedCodeBlockIsAMonospacedTextBlock() {
+        let s = render("```\nlet x = 1\n```\n")
+        let i = location(of: "let", in: s)
+        XCTAssertTrue(font(s, at: i).fontDescriptor.symbolicTraits.contains(.monoSpace))
+        XCTAssertEqual(paragraphStyle(s, at: i).textBlocks.count, 1)
+        XCTAssertEqual(s.string, "let x = 1\n")
+    }
+
+    func testHighlighterColoursCommentsStringsNumbersKeywords() {
+        let s = render("```swift\n// note\nlet s = \"hi\" + 42\n```")
+        func color(_ needle: String) -> NSColor? {
+            s.attribute(.foregroundColor, at: location(of: needle, in: s), effectiveRange: nil) as? NSColor
+        }
+        XCTAssertEqual(color("// note"), .secondaryLabelColor)
+        XCTAssertEqual(color("let"), .systemPurple)
+        XCTAssertEqual(color("\"hi\""), .systemRed)
+        XCTAssertEqual(color("42"), .systemBlue)
+        XCTAssertEqual(color(" s "), .textColor)
+    }
+
+    func testHighlighterSkipsUnknownAndPlainLanguages() {
+        XCTAssertEqual(render("```\nlet 1\n```").attribute(.foregroundColor, at: 0, effectiveRange: nil) as? NSColor, .textColor)
+        XCTAssertEqual(render("```text\nlet 1\n```").attribute(.foregroundColor, at: 0, effectiveRange: nil) as? NSColor, .textColor)
+    }
+
+    func testHashCommentsOnlyForHashLanguages() {
+        let py = render("```python\n# c\n```")
+        XCTAssertEqual(py.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? NSColor, .secondaryLabelColor)
+        let c = render("```c\n#include <x>\n```")
+        XCTAssertEqual(c.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? NSColor, .textColor)
+    }
+
+    func testInlineBrBecomesLineBreak() {
+        XCTAssertEqual(render("a<br>b<br/>c<BR />d").string, "a\u{2028}b\u{2028}c\u{2028}d\n")
+        XCTAssertTrue(render("a<span>b").string.contains("<span>"))
+    }
 }

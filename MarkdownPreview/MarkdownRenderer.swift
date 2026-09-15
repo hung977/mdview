@@ -221,6 +221,36 @@ struct Visitor: MarkupVisitor {
         return paragraph(hairline, style: paragraphStyle(spacing: 0, lineHeightMultiple: 1))
     }
 
+    // MARK: Code
+
+    mutating func visitInlineCode(_ inlineCode: InlineCode) -> NSAttributedString {
+        NSAttributedString(string: inlineCode.code, attributes: [
+            .font: Style.code(matching: font),
+            .foregroundColor: color,
+            .backgroundColor: Style.codeBackground,
+        ])
+    }
+
+    mutating func visitCodeBlock(_ codeBlock: CodeBlock) -> NSAttributedString {
+        let block = NSTextBlock()
+        block.backgroundColor = Style.codeBackground
+        block.setWidth(12, type: .absoluteValueType, for: .padding)
+        block.setWidth(Style.spacing, type: .absoluteValueType, for: .margin, edge: .maxY)
+        blocks.append(block)
+        defer { blocks.removeLast() }
+
+        var code = codeBlock.code
+        if code.hasSuffix("\n") { code.removeLast() }
+        let text = NSMutableAttributedString(string: code + "\n", attributes: [
+            .font: NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
+            .foregroundColor: NSColor.textColor,
+        ])
+        CodeHighlighter.highlight(text, language: codeBlock.language)
+        text.addAttribute(.paragraphStyle, value: paragraphStyle(spacing: 0, lineHeightMultiple: 1.15),
+                          range: NSRange(location: 0, length: text.length))
+        return text
+    }
+
     // MARK: Inlines
 
     mutating func visitText(_ text: Text) -> NSAttributedString {
@@ -251,7 +281,9 @@ struct Visitor: MarkupVisitor {
     }
 
     mutating func visitInlineHTML(_ inlineHTML: InlineHTML) -> NSAttributedString {
-        NSAttributedString(string: inlineHTML.rawHTML, attributes: attributes)
+        // `<br>` is ubiquitous inside table cells; everything else stays literal.
+        let isLineBreak = inlineHTML.rawHTML.range(of: #"^<br\s*/?>$"#, options: [.regularExpression, .caseInsensitive]) != nil
+        return NSAttributedString(string: isLineBreak ? "\u{2028}" : inlineHTML.rawHTML, attributes: attributes)
     }
 
     mutating func visitHTMLBlock(_ html: HTMLBlock) -> NSAttributedString {
@@ -259,5 +291,60 @@ struct Visitor: MarkupVisitor {
         let content = NSAttributedString(string: text, attributes: [.font: Style.code(matching: font),
                                                                      .foregroundColor: NSColor.secondaryLabelColor])
         return paragraph(content, style: paragraphStyle())
+    }
+}
+
+// MARK: - Code highlighting
+
+/// Deliberately tiny: comments, strings, numbers and a shared keyword list. No grammars.
+enum CodeHighlighter {
+    private static let plainLanguages: Set<String> = ["text", "plain", "plaintext", "txt", "markdown", "md", "output", "console"]
+    private static let hashLanguages: Set<String> = ["python", "py", "ruby", "rb", "sh", "bash", "zsh", "shell", "fish",
+                                                     "yaml", "yml", "toml", "ini", "conf", "dockerfile", "makefile",
+                                                     "make", "r", "perl", "pl", "elixir", "ex", "nim", "powershell", "ps1"]
+    private static let dashLanguages: Set<String> = ["sql", "lua", "haskell", "hs", "elm", "ada"]
+    private static let markupLanguages: Set<String> = ["html", "xml", "svg", "vue", "xhtml", "plist"]
+
+    private static let keywords: Set<String> = [
+        "as", "async", "await", "break", "case", "catch", "class", "const", "continue", "def", "default", "defer",
+        "do", "elif", "else", "enum", "except", "export", "extends", "extension", "false", "fn", "for", "from",
+        "func", "function", "guard", "if", "impl", "import", "in", "init", "interface", "internal", "is", "let",
+        "match", "mod", "module", "mut", "new", "nil", "none", "not", "null", "or", "and", "package", "pass",
+        "private", "protocol", "pub", "public", "raise", "return", "self", "static", "struct", "super", "switch",
+        "then", "this", "throw", "throws", "trait", "true", "try", "type", "typealias", "undefined", "use", "var",
+        "void", "when", "where", "while", "with", "yield", "select", "insert", "update", "delete", "create", "table",
+        "join", "into", "values", "end", "begin", "local", "require", "elseif", "lambda", "override", "final",
+        "some", "any", "int", "string", "bool", "float", "double", "char", "long", "unsigned", "using", "namespace",
+    ]
+
+    static func highlight(_ text: NSMutableAttributedString, language: String?) {
+        guard let language = language?.lowercased().trimmingCharacters(in: .whitespaces),
+              !language.isEmpty, !plainLanguages.contains(language) else { return }
+
+        let comment: String
+        if hashLanguages.contains(language) { comment = #"#[^\n]*"# }
+        else if dashLanguages.contains(language) { comment = #"--[^\n]*"# }
+        else if markupLanguages.contains(language) { comment = #"<!--[\s\S]*?-->"# }
+        else { comment = #"//[^\n]*|/\*[\s\S]*?\*/"# }
+
+        let passes: [(pattern: String, color: NSColor)] = [
+            (comment, .secondaryLabelColor),
+            (#""(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|`[^`\n]*`"#, .systemRed),
+            (#"\b\d+(?:\.\d+)?\b"#, .systemBlue),
+            (#"\b(?:"# + keywords.sorted().joined(separator: "|") + #")\b"#, .systemPurple),
+        ]
+
+        let string = text.string as NSString
+        let full = NSRange(location: 0, length: string.length)
+        var covered = [Bool](repeating: false, count: string.length)
+        for pass in passes {
+            guard let regex = try? NSRegularExpression(pattern: pass.pattern) else { continue }
+            for match in regex.matches(in: text.string, range: full) {
+                let range = match.range
+                guard range.length > 0, !covered[range.location] else { continue }
+                text.addAttribute(.foregroundColor, value: pass.color, range: range)
+                for i in range.location ..< range.location + range.length { covered[i] = true }
+            }
+        }
     }
 }
