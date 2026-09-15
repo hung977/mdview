@@ -44,4 +44,52 @@ final class MarkdownRendererTests: XCTestCase {
         let s = render("a  \nb")
         XCTAssertEqual(s.string, "a\u{2028}b\n")
     }
+
+    func testNestedListsIndentPerLevel() {
+        let s = render("- a\n  - b\n1. c")
+        let a = paragraphStyle(s, at: location(of: "a", in: s))
+        let b = paragraphStyle(s, at: location(of: "b", in: s))
+        XCTAssertEqual(a.headIndent, Style.indent)
+        XCTAssertEqual(a.firstLineHeadIndent, 0)
+        XCTAssertEqual(b.headIndent, Style.indent * 2)
+        XCTAssertTrue(s.string.contains("•\ta"))
+        XCTAssertTrue(s.string.contains("1.\tc"))
+    }
+
+    func testOrderedListHonoursStartIndex() {
+        let s = render("3. x\n4. y")
+        XCTAssertTrue(s.string.contains("3.\tx"))
+        XCTAssertTrue(s.string.contains("4.\ty"))
+    }
+
+    func testTopLevelListEndsWithBlockSpacing() {
+        let s = render("- a\n- b\n\nafter")
+        let b = paragraphStyle(s, at: location(of: "b", in: s))
+        XCTAssertEqual(b.paragraphSpacing, Style.spacing)
+        let a = paragraphStyle(s, at: location(of: "a", in: s))
+        XCTAssertEqual(a.paragraphSpacing, Style.listSpacing)
+    }
+
+    func testTaskItemsUseAttachmentMarkers() {
+        let s = render("- [x] done\n- [ ] todo")
+        let attachment = s.attribute(.attachment, at: 0, effectiveRange: nil) as? NSTextAttachment
+        XCTAssertNotNil(attachment?.image)
+        XCTAssertEqual(s.string.filter { $0 == "\u{FFFC}" }.count, 2)
+    }
+
+    func testBlockquoteUsesTextBlockAndSecondaryColor() {
+        let s = render("> quoted")
+        let i = location(of: "quoted", in: s)
+        XCTAssertEqual(paragraphStyle(s, at: i).textBlocks.count, 1)
+        XCTAssertEqual(s.attribute(.foregroundColor, at: i, effectiveRange: nil) as? NSColor, .secondaryLabelColor)
+    }
+
+    func testThematicBreakIsASeparatorColouredBlock() {
+        let s = render("a\n\n---\n\nb")
+        var found = false
+        s.enumerateAttribute(.paragraphStyle, in: NSRange(location: 0, length: s.length)) { value, _, _ in
+            if let style = value as? NSParagraphStyle, style.textBlocks.first?.backgroundColor == .separatorColor { found = true }
+        }
+        XCTAssertTrue(found)
+    }
 }

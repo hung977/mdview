@@ -141,6 +141,86 @@ struct Visitor: MarkupVisitor {
         }
     }
 
+    // MARK: Lists
+
+    mutating func visitUnorderedList(_ list: UnorderedList) -> NSAttributedString {
+        let bullet = Style.bullets[listDepth % Style.bullets.count]
+        return renderList(list) { _ in bullet }
+    }
+
+    mutating func visitOrderedList(_ list: OrderedList) -> NSAttributedString {
+        let start = Int(list.startIndex)
+        return renderList(list) { index in "\(start + index)." }
+    }
+
+    private mutating func renderList(_ list: any ListItemContainer, markerFor: (Int) -> String) -> NSAttributedString {
+        let result = NSMutableAttributedString()
+        listDepth += 1
+        for (index, item) in list.listItems.enumerated() {
+            if let checkbox = item.checkbox {
+                marker = checkboxMarker(checked: checkbox == .checked)
+            } else {
+                marker = NSAttributedString(string: markerFor(index) + "\t", attributes: attributes)
+            }
+            // Items whose first child is not a paragraph (nested list, code block, empty item)
+            // get the marker on its own line so it is never lost.
+            if !(item.child(at: 0) is Paragraph), let marker {
+                result.append(paragraph(marker, style: paragraphStyle(spacing: Style.listSpacing, hanging: true)))
+                self.marker = nil
+            }
+            result.append(visitChildren(item))
+        }
+        listDepth -= 1
+        if listDepth == 0 { setSpacingAfter(result, Style.spacing) }
+        return result
+    }
+
+    private func checkboxMarker(checked: Bool) -> NSAttributedString {
+        let name = checked ? "checkmark.square.fill" : "square"
+        let configuration = NSImage.SymbolConfiguration(pointSize: font.pointSize, weight: .regular)
+            .applying(.init(paletteColors: [checked ? .controlAccentColor : .secondaryLabelColor]))
+        let attachment = NSTextAttachment()
+        if let image = NSImage(systemSymbolName: name, accessibilityDescription: checked ? "checked" : "unchecked")?
+            .withSymbolConfiguration(configuration) {
+            attachment.image = image
+            attachment.bounds = CGRect(x: 0, y: font.descender, width: image.size.width, height: image.size.height)
+        }
+        let result = NSMutableAttributedString(attachment: attachment)
+        result.append(NSAttributedString(string: "\t"))
+        result.addAttributes(attributes, range: NSRange(location: 0, length: result.length))
+        return result
+    }
+
+    // MARK: Quote / rule
+
+    mutating func visitBlockQuote(_ blockQuote: BlockQuote) -> NSAttributedString {
+        let block = NSTextBlock()
+        block.setWidth(3, type: .absoluteValueType, for: .border, edge: .minX)
+        block.setBorderColor(.separatorColor)
+        block.setWidth(12, type: .absoluteValueType, for: .padding, edge: .minX)
+        block.setWidth(Style.spacing, type: .absoluteValueType, for: .margin, edge: .maxY)
+        blocks.append(block)
+        let savedColor = color
+        color = .secondaryLabelColor
+        defer { blocks.removeLast(); color = savedColor }
+        let content = NSMutableAttributedString(attributedString: visitChildren(blockQuote))
+        setSpacingAfter(content, 0)   // the block margin provides the gap
+        return content
+    }
+
+    mutating func visitThematicBreak(_ thematicBreak: ThematicBreak) -> NSAttributedString {
+        let block = NSTextBlock()
+        block.backgroundColor = .separatorColor
+        block.setValue(1, type: .absoluteValueType, for: .height)
+        block.setValue(1, type: .absoluteValueType, for: .maximumHeight)
+        block.setWidth(Style.spacing, type: .absoluteValueType, for: .margin, edge: .minY)
+        block.setWidth(Style.spacing, type: .absoluteValueType, for: .margin, edge: .maxY)
+        blocks.append(block)
+        defer { blocks.removeLast() }
+        let hairline = NSAttributedString(string: "\u{200B}", attributes: [.font: NSFont.systemFont(ofSize: 1)])
+        return paragraph(hairline, style: paragraphStyle(spacing: 0, lineHeightMultiple: 1))
+    }
+
     // MARK: Inlines
 
     mutating func visitText(_ text: Text) -> NSAttributedString {
