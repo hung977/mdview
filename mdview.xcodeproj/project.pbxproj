@@ -7,17 +7,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		019EFCE5B32EDAFF2F144689 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6A9A75FD11B9CD88E182141F /* Assets.xcassets */; };
+		1E19C131EC0B175CCF1072A7 /* mdviewQuickLook.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 879B5BCB74ED007DF493F47B /* mdviewQuickLook.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		1F04A55F5CC846321BF4D440 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = E012133B7F6566C690801B9E /* Document.swift */; };
 		1FEDA905857DCE0AF7DFE541 /* FileWatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD2137190663FA19877AB4A /* FileWatcherTests.swift */; };
 		2AF116D7362DA2A8018001B5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 992A40E4669BC58BB0017F91 /* ContentView.swift */; };
 		50858ACC99E2D6A9CDDA76B4 /* MDViewApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0E0927D588F55E8E9E694 /* MDViewApp.swift */; };
+		50AA2650FFC67A18849A1FC4 /* Viewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B179FD75857C3580073C08B /* Viewer.swift */; };
 		62DA63FA25D73D2F0EDA9662 /* ViewerWebViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D93B1DF770ED35FF4B9B467 /* ViewerWebViewTests.swift */; };
 		931E683E8678A674C25E3DC4 /* Viewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B179FD75857C3580073C08B /* Viewer.swift */; };
+		9BDF0CA134FDEDCA45C378FD /* PreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E0076BE7CA159F27FEEFA08 /* PreviewViewController.swift */; };
+		B368604D95501DB2C414CBA5 /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = 4F52B7FDE23C110114F049F3 /* Resources */; };
 		B7E9890C7E32486EDC1EDF95 /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = 4F52B7FDE23C110114F049F3 /* Resources */; };
 		BC4D81AB58B039C65B2C75C0 /* FindBarTypingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16461561D0C3633D2CD82287 /* FindBarTypingTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		32F0D0C71A24493E35EC2F35 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 16F80D69FDF31DA953B25AC6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E8FBBC88C1B805ACE8F72C2B;
+			remoteInfo = mdviewQuickLook;
+		};
 		57B8A0BFF4A6D2827F4C5578 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 16F80D69FDF31DA953B25AC6 /* Project object */;
@@ -25,16 +37,42 @@
 			remoteGlobalIDString = 9F50E1CE7B626A939626D2B8;
 			remoteInfo = mdview;
 		};
+		EC9D5633DB2C41B12830EC08 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 16F80D69FDF31DA953B25AC6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E8FBBC88C1B805ACE8F72C2B;
+			remoteInfo = mdviewQuickLook;
+		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		C86D5F541E0AB99856E157E0 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				1E19C131EC0B175CCF1072A7 /* mdviewQuickLook.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		13A06FA3F4633E470E0842AC /* mdviewQuickLook.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = mdviewQuickLook.entitlements; sourceTree = "<group>"; };
 		16461561D0C3633D2CD82287 /* FindBarTypingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindBarTypingTests.swift; sourceTree = "<group>"; };
 		2B179FD75857C3580073C08B /* Viewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Viewer.swift; sourceTree = "<group>"; };
 		2D93B1DF770ED35FF4B9B467 /* ViewerWebViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewerWebViewTests.swift; sourceTree = "<group>"; };
 		3666D30AA351AC44487DD5A4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		3C9E1E07F1B6DFE22FBE0F01 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4DD0E0927D588F55E8E9E694 /* MDViewApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDViewApp.swift; sourceTree = "<group>"; };
 		4F52B7FDE23C110114F049F3 /* Resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Resources; path = mdview/Resources; sourceTree = SOURCE_ROOT; };
+		6A9A75FD11B9CD88E182141F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7E0076BE7CA159F27FEEFA08 /* PreviewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewViewController.swift; sourceTree = "<group>"; };
 		86B6299154C1BA633138762C /* mdviewTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = mdviewTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		879B5BCB74ED007DF493F47B /* mdviewQuickLook.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = mdviewQuickLook.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		992A40E4669BC58BB0017F91 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		ACD2137190663FA19877AB4A /* FileWatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWatcherTests.swift; sourceTree = "<group>"; };
 		DE5D57C3B42A29D67FA92A43 /* mdview.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mdview.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -42,10 +80,21 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		5B54A13C80F49E1BAEE979E9 /* mdviewQuickLook */ = {
+			isa = PBXGroup;
+			children = (
+				3C9E1E07F1B6DFE22FBE0F01 /* Info.plist */,
+				13A06FA3F4633E470E0842AC /* mdviewQuickLook.entitlements */,
+				7E0076BE7CA159F27FEEFA08 /* PreviewViewController.swift */,
+			);
+			path = mdviewQuickLook;
+			sourceTree = "<group>";
+		};
 		6D1E67B10ED428EB5D49EFA0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				DE5D57C3B42A29D67FA92A43 /* mdview.app */,
+				879B5BCB74ED007DF493F47B /* mdviewQuickLook.appex */,
 				86B6299154C1BA633138762C /* mdviewTests.xctest */,
 			);
 			name = Products;
@@ -64,6 +113,7 @@
 		E802E4652A78958FBD881A00 /* mdview */ = {
 			isa = PBXGroup;
 			children = (
+				6A9A75FD11B9CD88E182141F /* Assets.xcassets */,
 				992A40E4669BC58BB0017F91 /* ContentView.swift */,
 				E012133B7F6566C690801B9E /* Document.swift */,
 				3666D30AA351AC44487DD5A4 /* Info.plist */,
@@ -78,6 +128,7 @@
 			isa = PBXGroup;
 			children = (
 				E802E4652A78958FBD881A00 /* mdview */,
+				5B54A13C80F49E1BAEE979E9 /* mdviewQuickLook */,
 				A6C222E19B72CE98E8413EAA /* mdviewTests */,
 				6D1E67B10ED428EB5D49EFA0 /* Products */,
 			);
@@ -110,10 +161,12 @@
 			buildPhases = (
 				41D94C34811AD559D40300DC /* Sources */,
 				AF6473C3B527A860AF093B47 /* Resources */,
+				C86D5F541E0AB99856E157E0 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				98CD54EEC9FAC20F5ECEC688 /* PBXTargetDependency */,
 			);
 			name = mdview;
 			packageProductDependencies = (
@@ -121,6 +174,25 @@
 			productName = mdview;
 			productReference = DE5D57C3B42A29D67FA92A43 /* mdview.app */;
 			productType = "com.apple.product-type.application";
+		};
+		E8FBBC88C1B805ACE8F72C2B /* mdviewQuickLook */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 876B6C8BFD6BF3B7A027FE76 /* Build configuration list for PBXNativeTarget "mdviewQuickLook" */;
+			buildPhases = (
+				3F68191602DF34877080B941 /* Sources */,
+				14C6B9A192A4D568223AE483 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D75F3C8C185E54962EE6CF29 /* PBXTargetDependency */,
+			);
+			name = mdviewQuickLook;
+			packageProductDependencies = (
+			);
+			productName = mdviewQuickLook;
+			productReference = 879B5BCB74ED007DF493F47B /* mdviewQuickLook.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -136,6 +208,10 @@
 						ProvisioningStyle = Manual;
 					};
 					9F50E1CE7B626A939626D2B8 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Manual;
+					};
+					E8FBBC88C1B805ACE8F72C2B = {
 						DevelopmentTeam = "";
 						ProvisioningStyle = Manual;
 					};
@@ -156,16 +232,26 @@
 			projectRoot = "";
 			targets = (
 				9F50E1CE7B626A939626D2B8 /* mdview */,
+				E8FBBC88C1B805ACE8F72C2B /* mdviewQuickLook */,
 				38C9E10636CC61ECC44F08C0 /* mdviewTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		14C6B9A192A4D568223AE483 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B368604D95501DB2C414CBA5 /* Resources in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AF6473C3B527A860AF093B47 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				019EFCE5B32EDAFF2F144689 /* Assets.xcassets in Resources */,
 				B7E9890C7E32486EDC1EDF95 /* Resources in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -173,6 +259,15 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		3F68191602DF34877080B941 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9BDF0CA134FDEDCA45C378FD /* PreviewViewController.swift in Sources */,
+				50AA2650FFC67A18849A1FC4 /* Viewer.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		41D94C34811AD559D40300DC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -197,6 +292,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		98CD54EEC9FAC20F5ECEC688 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E8FBBC88C1B805ACE8F72C2B /* mdviewQuickLook */;
+			targetProxy = 32F0D0C71A24493E35EC2F35 /* PBXContainerItemProxy */;
+		};
+		D75F3C8C185E54962EE6CF29 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E8FBBC88C1B805ACE8F72C2B /* mdviewQuickLook */;
+			targetProxy = EC9D5633DB2C41B12830EC08 /* PBXContainerItemProxy */;
+		};
 		E77F6A7A50052D2E14C45BBE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 9F50E1CE7B626A939626D2B8 /* mdview */;
@@ -351,6 +456,25 @@
 			};
 			name = Release;
 		};
+		484AE2CCB7E4FC9DF4657BDF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = mdviewQuickLook/mdviewQuickLook.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = mdviewQuickLook/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.hungpv.mdview.quicklook;
+				PRODUCT_NAME = mdviewQuickLook;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
 		4904F41FA72701EA30F2E8DF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -406,6 +530,25 @@
 			};
 			name = Release;
 		};
+		DA5C46451F3492FA11FAE6CC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = mdviewQuickLook/mdviewQuickLook.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = mdviewQuickLook/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.hungpv.mdview.quicklook;
+				PRODUCT_NAME = mdviewQuickLook;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -423,6 +566,15 @@
 			buildConfigurations = (
 				8FFC7CBA533C3D09DE609F47 /* Debug */,
 				CF5EF17E31323C537CE9EDD0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		876B6C8BFD6BF3B7A027FE76 /* Build configuration list for PBXNativeTarget "mdviewQuickLook" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				484AE2CCB7E4FC9DF4657BDF /* Debug */,
+				DA5C46451F3492FA11FAE6CC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

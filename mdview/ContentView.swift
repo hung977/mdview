@@ -7,6 +7,7 @@ struct ContentView: View {
     let fileURL: URL?
     @State private var text: String
     @State private var watcher: FileWatcher?
+    @State private var showRaw = false
 
     init(document: MarkdownDocument, fileURL: URL?) {
         self.document = document
@@ -15,7 +16,16 @@ struct ContentView: View {
     }
 
     var body: some View {
-        MarkdownWebView(text: text, baseURL: fileURL?.deletingLastPathComponent())
+        MarkdownWebView(text: text, baseURL: fileURL?.deletingLastPathComponent(), showRaw: showRaw)
+            .toolbar {
+                ToolbarItem {
+                    Toggle(isOn: $showRaw) {
+                        Label("Raw", systemImage: "doc.plaintext")
+                    }
+                    .toggleStyle(.button)
+                    .help(showRaw ? "Show rendered preview" : "Show raw Markdown")
+                }
+            }
             .onAppear {
                 guard watcher == nil, let fileURL else { return }
                 watcher = FileWatcher(url: fileURL) { reload(from: fileURL) }
@@ -44,8 +54,12 @@ struct ContentView: View {
 struct MarkdownWebView: NSViewRepresentable {
     let text: String
     let baseURL: URL?
+    let showRaw: Bool
 
-    final class Coordinator { var lastText: String? }
+    final class Coordinator {
+        var lastText: String?
+        var lastShowRaw = false
+    }
     func makeCoordinator() -> Coordinator { Coordinator() }
 
     func makeNSView(context: Context) -> ViewerView {
@@ -53,20 +67,24 @@ struct MarkdownWebView: NSViewRepresentable {
     }
 
     func updateNSView(_ viewer: ViewerView, context: Context) {
-        guard context.coordinator.lastText != text else { return }
-        context.coordinator.lastText = text
-        viewer.webView.render(text)
+        if context.coordinator.lastShowRaw != showRaw {
+            context.coordinator.lastShowRaw = showRaw
+            viewer.webView.setMode(raw: showRaw)
+        }
+        if context.coordinator.lastText != text {
+            context.coordinator.lastText = text
+            viewer.webView.render(text)
+        }
     }
 }
 
 // MARK: - Viewer = native find bar + web view
 
-/// Stacks a native find bar (hidden until ⌘F) above the web view, and puts the Raw/Preview toggle
-/// in the window's title bar. The find actions from the Edit ▸ Find menu land here.
+/// Stacks a native find bar (hidden until ⌘F) above the web view. The find actions from the
+/// Edit ▸ Find menu land here.
 final class ViewerView: NSView {
     let webView: ViewerWebView
     let findBar = FindBar()
-    let rawToggle = RawToggleAccessory()
 
     init(baseURL: URL?) {
         webView = ViewerWebView(baseURL: baseURL)
@@ -89,17 +107,10 @@ final class ViewerView: NSView {
         findBar.onNext = { [weak self] in self?.findNext(nil) }
         findBar.onPrevious = { [weak self] in self?.findPrevious(nil) }
         findBar.onDone = { [weak self] in self?.hideFind() }
-        rawToggle.onToggle = { [weak self] raw in self?.webView.setMode(raw: raw) }
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("not supported") }
-
-    override func viewDidMoveToWindow() {
-        super.viewDidMoveToWindow()
-        guard let window, !window.titlebarAccessoryViewControllers.contains(rawToggle) else { return }
-        window.addTitlebarAccessoryViewController(rawToggle)
-    }
 
     static func first(in view: NSView) -> ViewerView? {
         if let found = view as? ViewerView { return found }
@@ -133,45 +144,6 @@ final class ViewerView: NSView {
         webView.evaluate(script) { [weak self] result in
             self?.findBar.status = result as? String ?? ""
         }
-    }
-}
-
-/// A small toggle at the trailing edge of the standard title bar: rendered preview ⇄ raw source.
-final class RawToggleAccessory: NSTitlebarAccessoryViewController {
-    var onToggle: ((Bool) -> Void)?
-    private let button = NSButton()
-
-    init() {
-        super.init(nibName: nil, bundle: nil)
-        layoutAttribute = .trailing
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) { fatalError("not supported") }
-
-    override func loadView() {
-        button.image = NSImage(systemSymbolName: "doc.plaintext", accessibilityDescription: "Raw Markdown")
-        button.bezelStyle = .texturedRounded
-        button.setButtonType(.pushOnPushOff)
-        button.isBordered = true
-        button.toolTip = "Show raw Markdown"
-        button.target = self
-        button.action = #selector(toggled)
-        button.controlSize = .small
-        button.sizeToFit()
-        // Title bar accessories are sized from their frame, not from Auto Layout.
-        let size = NSSize(width: max(button.frame.width, 30), height: max(button.frame.height, 22))
-        button.frame = NSRect(origin: .zero, size: size)
-        let container = NSView(frame: NSRect(x: 0, y: 0, width: size.width + 10, height: size.height))
-        container.addSubview(button)
-        view = container
-    }
-
-    var isRaw: Bool { button.state == .on }
-
-    @objc private func toggled() {
-        button.toolTip = isRaw ? "Show rendered preview" : "Show raw Markdown"
-        onToggle?(isRaw)
     }
 }
 

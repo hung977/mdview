@@ -7,6 +7,7 @@ struct MDViewApp: App {
             ContentView(document: file.document, fileURL: file.fileURL)
         }
         .defaultSize(width: 800, height: 900)
+        .windowToolbarStyle(.unifiedCompact)   // standard-height title bar, like TextEdit
         .commands {
             // SwiftUI's default Edit menu has no Find items; these drive the page's find bar.
             CommandGroup(after: .pasteboard) {

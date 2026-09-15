@@ -26,10 +26,13 @@ targets:
       - path: mdview/Resources
         type: folder
         buildPhase: resources
+    dependencies:
+      - target: mdviewQuickLook
     settings:
       base:
         PRODUCT_NAME: mdview
         PRODUCT_MODULE_NAME: mdview
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         PRODUCT_BUNDLE_IDENTIFIER: com.hungpv.mdview
         GENERATE_INFOPLIST_FILE: NO
         ENABLE_PREVIEWS: NO
@@ -60,6 +63,44 @@ targets:
               public.filename-extension: [md, markdown]
               public.mime-type: [text/markdown]
 
+  mdviewQuickLook:
+    type: app-extension
+    platform: macOS
+    sources:
+      - path: mdviewQuickLook
+      - path: mdview/Viewer.swift
+      - path: mdview/Resources
+        type: folder
+        buildPhase: resources
+    dependencies:
+      - target: mdviewQuickLook
+    settings:
+      base:
+        PRODUCT_NAME: mdviewQuickLook
+        PRODUCT_BUNDLE_IDENTIFIER: com.hungpv.mdview.quicklook
+        GENERATE_INFOPLIST_FILE: NO
+        SKIP_INSTALL: YES
+    info:
+      path: mdviewQuickLook/Info.plist
+      properties:
+        CFBundleDisplayName: mdview Quick Look
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        LSMinimumSystemVersion: "14.0"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.quicklook.preview
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
+          NSExtensionAttributes:
+            QLSupportedContentTypes:
+              - net.daringfireball.markdown
+            QLSupportsSearchableItems: false
+    entitlements:
+      path: mdviewQuickLook/mdviewQuickLook.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.files.user-selected.read-only: true
+        com.apple.security.network.client: true   # WKWebView needs this inside a sandbox, even for local pages
+
   mdviewTests:
     type: bundle.unit-test
     platform: macOS
@@ -77,6 +118,7 @@ schemes:
     build:
       targets:
         mdview: all
+        mdviewQuickLook: all
         mdviewTests: [test]
     run:
       config: Debug

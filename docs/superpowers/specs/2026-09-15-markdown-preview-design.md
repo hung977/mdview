@@ -125,3 +125,18 @@ than GitHub). The engine was replaced; everything outside the rendering box is u
   `MarkdownWebView`, `ViewerView`, `FindBar`, `ViewerWebView`, `Page`), `Resources/`. `MarkdownRenderer.swift` deleted.
 - **Tests:** `ViewerWebViewTests` render through the real page and assert on the DOM; `FileWatcherTests` unchanged.
 - **Cost:** one extra WebContent process (~140 MB on an 86 KB, 428-row document); window still appears in ~0.4 s.
+
+## Revision 3 (2026-09-15): mdview, Quick Look, icon
+
+- App renamed **mdview** (product, module, bundle id `com.hungpv.mdview`, targets `mdview`, `mdviewTests`, `mdviewQuickLook`).
+- Title bar: `.windowToolbarStyle(.unifiedCompact)` — standard-height title bar like TextEdit, with the
+  Raw/Preview toolbar toggle inline.
+- Find bar is native AppKit (see Revision 2 note); the search field stretches across the bar.
+- **Quick Look Preview Extension** (`mdviewQuickLook`, `com.apple.quicklook.preview`, content type
+  `net.daringfireball.markdown`): a `QLPreviewingController` that hosts `ViewerWebView` and calls the
+  completion handler after the page has rendered. Sandboxed with `files.user-selected.read-only` and
+  `network.client` — the latter is required for WKWebView's processes to run inside a sandbox at all.
+  Images next to the file are not readable from the sandbox, so Quick Look shows their alt text.
+- `Viewer.swift` (ViewerWebView + Page) and `Resources/` are compiled into both the app and the extension;
+  `Page` locates resources with `Bundle(for: ViewerWebView.self)`.
+- App icon generated programmatically (blue squircle, Markdown "M↓" mark) into `Assets.xcassets/AppIcon`.
