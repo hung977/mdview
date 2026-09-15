@@ -15,10 +15,6 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
 </p>
 
-<p align="center">
-  <img src="docs/images/screenshot.png" width="900" alt="mdview showing a Markdown file with the outline sidebar open">
-</p>
-
 ## Features
 
 - **GitHub-flavoured rendering** — CommonMark plus tables, task lists, strikethrough, autolinked URLs, clickable tables of contents, local and remote images, raw HTML.
