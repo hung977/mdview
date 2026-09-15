@@ -165,4 +165,44 @@ final class MarkdownRendererTests: XCTestCase {
         }
         XCTAssertEqual(cells.count, 6)
     }
+
+    func testAbsoluteAndRelativeLinks() {
+        let base = URL(fileURLWithPath: "/tmp/proj/", isDirectory: true)
+        let s = render("[web](https://example.com/x) [doc](docs/a%20b.md#sec) [frag](#top)", baseURL: base)
+        XCTAssertEqual(s.attribute(.link, at: location(of: "web", in: s), effectiveRange: nil) as? URL,
+                       URL(string: "https://example.com/x"))
+        XCTAssertEqual((s.attribute(.link, at: location(of: "doc", in: s), effectiveRange: nil) as? URL)?.path,
+                       "/tmp/proj/docs/a b.md")
+        XCTAssertNil(s.attribute(.link, at: location(of: "frag", in: s), effectiveRange: nil))
+    }
+
+    func testLocalImageBecomesAttachmentAndMissingImageBecomesAltText() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let image = NSImage(size: NSSize(width: 4, height: 4), flipped: false) { rect in
+            NSColor.red.setFill(); rect.fill(); return true
+        }
+        let png = NSBitmapImageRep(data: image.tiffRepresentation!)!.representation(using: .png, properties: [:])!
+        try png.write(to: dir.appendingPathComponent("pic.png"))
+
+        let s = render("![alt one](pic.png)\n\n![alt two](missing.png)", baseURL: dir)
+        let attachment = s.attribute(.attachment, at: 0, effectiveRange: nil) as? ImageAttachment
+        XCTAssertNotNil(attachment?.image)
+        XCTAssertTrue(s.string.contains("alt two"))
+        XCTAssertFalse(s.string.contains("alt one"))
+    }
+
+    func testRemoteImageProducesPendingAttachment() {
+        let s = render("![badge](https://example.invalid/badge.svg)")
+        XCTAssertTrue(s.attribute(.attachment, at: 0, effectiveRange: nil) is ImageAttachment)
+    }
+
+    func testImageAttachmentBoundsFitLineWidth() {
+        let image = NSImage(size: NSSize(width: 2000, height: 1000))
+        let attachment = ImageAttachment(image: image)
+        let bounds = attachment.attachmentBounds(for: nil, proposedLineFragment: CGRect(x: 0, y: 0, width: 500, height: 20),
+                                                 glyphPosition: .zero, characterIndex: 0)
+        XCTAssertEqual(bounds.width, 500, accuracy: 0.01)
+        XCTAssertEqual(bounds.height, 250, accuracy: 0.01)
+    }
 }

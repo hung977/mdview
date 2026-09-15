@@ -316,6 +316,42 @@ struct Visitor: MarkupVisitor {
         return (widths.map { $0 / total * 100 }, total)
     }
 
+    // MARK: Links & images
+
+    mutating func visitLink(_ link: Link) -> NSAttributedString {
+        let content = NSMutableAttributedString(attributedString: visitChildren(link))
+        if let url = resolve(link.destination) {
+            content.addAttribute(.link, value: url, range: NSRange(location: 0, length: content.length))
+        }
+        return content
+    }
+
+    mutating func visitImage(_ image: Image) -> NSAttributedString {
+        let alt = NSAttributedString(string: image.plainText,
+                                     attributes: [.font: font, .foregroundColor: NSColor.secondaryLabelColor])
+        guard let url = resolve(image.source) else { return alt }
+        let attachment: ImageAttachment
+        if url.isFileURL {
+            guard let loaded = NSImage(contentsOf: url) else { return alt }
+            attachment = ImageAttachment(image: loaded)
+        } else {
+            attachment = ImageAttachment(remote: url)
+        }
+        let result = NSMutableAttributedString(attachment: attachment)
+        result.addAttributes(attributes, range: NSRange(location: 0, length: result.length))
+        return result
+    }
+
+    /// Absolute URLs pass through; relative paths resolve against the document's folder;
+    /// fragment-only links are dropped.
+    func resolve(_ destination: String?) -> URL? {
+        guard let destination, !destination.isEmpty, !destination.hasPrefix("#") else { return nil }
+        if let url = URL(string: destination), url.scheme != nil { return url }
+        guard let baseURL else { return nil }
+        let path = String(destination.split(separator: "#", maxSplits: 1)[0])
+        return URL(fileURLWithPath: path.removingPercentEncoding ?? path, relativeTo: baseURL).absoluteURL
+    }
+
     // MARK: Inlines
 
     mutating func visitText(_ text: Text) -> NSAttributedString {
@@ -411,5 +447,52 @@ enum CodeHighlighter {
                 for i in range.location ..< range.location + range.length { covered[i] = true }
             }
         }
+    }
+}
+
+// MARK: - Images
+
+/// Attachment that scales to the line width and, for remote URLs, fills itself in when the
+/// download finishes. A small in-memory cache keeps live reloads from re-downloading.
+final class ImageAttachment: NSTextAttachment {
+    private static var cache: [URL: NSImage] = [:]   // main-thread only
+
+    private weak var layoutManager: NSLayoutManager?
+    private var characterIndex = NSNotFound
+
+    init(image: NSImage?) {
+        super.init(data: nil, ofType: nil)
+        self.image = image
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("not supported") }
+
+    convenience init(remote url: URL) {
+        self.init(image: Self.cache[url])
+        guard image == nil else { return }
+        URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
+            let loaded = data.flatMap { NSImage(data: $0) }
+            DispatchQueue.main.async {
+                if let loaded { Self.cache[url] = loaded }
+                self?.didLoad(loaded ?? NSImage(systemSymbolName: "photo", accessibilityDescription: "missing image"))
+            }
+        }.resume()
+    }
+
+    private func didLoad(_ loaded: NSImage?) {
+        image = loaded
+        guard let storage = layoutManager?.textStorage, characterIndex < storage.length else { return }
+        storage.edited(.editedAttributes, range: NSRange(location: characterIndex, length: 1), changeInLength: 0)
+    }
+
+    override func attachmentBounds(for textContainer: NSTextContainer?, proposedLineFragment lineFrag: CGRect,
+                                   glyphPosition position: CGPoint, characterIndex charIndex: Int) -> CGRect {
+        layoutManager = textContainer?.layoutManager
+        characterIndex = charIndex
+        guard let image, image.size.width > 0 else { return .zero }
+        let available = max(1, lineFrag.width - 2 * (textContainer?.lineFragmentPadding ?? 0))
+        let scale = min(1, available / image.size.width)
+        return CGRect(x: 0, y: 0, width: image.size.width * scale, height: image.size.height * scale)
     }
 }
