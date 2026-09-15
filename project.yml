@@ -1,0 +1,89 @@
+name: MarkdownPreview
+options:
+  bundleIdPrefix: com.hungpv
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+packages:
+  Markdown:
+    url: https://github.com/apple/swift-markdown
+    from: "0.5.0"
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "-"
+    DEVELOPMENT_TEAM: ""
+    ENABLE_HARDENED_RUNTIME: YES
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: NO
+
+targets:
+  MarkdownPreview:
+    type: application
+    platform: macOS
+    sources:
+      - path: MarkdownPreview
+        excludes: ["Sample.md", "sample.png"]
+    dependencies:
+      - package: Markdown
+    settings:
+      base:
+        PRODUCT_NAME: Markdown Preview
+        PRODUCT_MODULE_NAME: MarkdownPreview
+        PRODUCT_BUNDLE_IDENTIFIER: com.hungpv.MarkdownPreview
+        GENERATE_INFOPLIST_FILE: NO
+        ENABLE_PREVIEWS: NO
+    info:
+      path: MarkdownPreview/Info.plist
+      properties:
+        CFBundleDisplayName: Markdown Preview
+        CFBundleName: Markdown Preview
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        LSMinimumSystemVersion: "14.0"
+        LSApplicationCategoryType: public.app-category.utilities
+        NSPrincipalClass: NSApplication
+        NSSupportsAutomaticTermination: true
+        NSSupportsSuddenTermination: true
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Markdown Document
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Default
+            LSItemContentTypes:
+              - net.daringfireball.markdown
+        UTImportedTypeDeclarations:
+          - UTTypeIdentifier: net.daringfireball.markdown
+            UTTypeDescription: Markdown Document
+            UTTypeConformsTo:
+              - public.plain-text
+            UTTypeTagSpecification:
+              public.filename-extension: [md, markdown]
+              public.mime-type: [text/markdown]
+
+  MarkdownPreviewTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources: [MarkdownPreviewTests]
+    dependencies:
+      - target: MarkdownPreview
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Markdown Preview.app/Contents/MacOS/Markdown Preview"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+
+schemes:
+  MarkdownPreview:
+    build:
+      targets:
+        MarkdownPreview: all
+        MarkdownPreviewTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets: [MarkdownPreviewTests]
