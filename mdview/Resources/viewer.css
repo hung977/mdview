@@ -1,0 +1,38 @@
+/* Page chrome around github-markdown-css. Colours mirror GitHub so the WebView never flashes. */
+html, body { margin: 0; padding: 0; background: #ffffff; }
+@media (prefers-color-scheme: dark) { html, body { background: #0d1117; } }
+
+/* Content scrolls underneath the window's glass toolbar; --top-inset is set from Swift. */
+:root { --top-inset: 0px; }
+html { scroll-padding-top: calc(var(--top-inset) + 8px); }
+
+.markdown-body {
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: calc(24px + var(--top-inset)) 40px 64px;
+  font-size: 15px;
+}
+@media (max-width: 767px) { .markdown-body { padding: 16px; } }
+
+.markdown-body input[type="checkbox"] { vertical-align: middle; }
+
+/* Raw source view: plain wrapped monospace, no code-block chrome. */
+.markdown-body.raw pre.raw-source,
+.markdown-body.raw pre.raw-source code {
+  background: transparent; padding: 0; margin: 0;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  font-size: 13px; line-height: 1.5;
+}
+.markdown-body pre.mermaid { background: transparent; text-align: center; }
+.markdown-body pre.mermaid svg { max-width: 100%; height: auto; }
+
+/* github-markdown-css already pads <pre>; highlight.js must not pad again. */
+.markdown-body pre code.hljs { padding: 0; background: transparent; }
+
+/* Find matches (CSS Custom Highlight API; selection and focus stay untouched). */
+::highlight(find-match) { background: rgba(255, 214, 0, 0.45); }
+::highlight(find-current) { background: #ff9632; color: #1f2328; }
+@media (prefers-color-scheme: dark) {
+  ::highlight(find-match) { background: rgba(255, 214, 0, 0.35); }
+  ::highlight(find-current) { background: #ffb347; color: #0d1117; }
+}

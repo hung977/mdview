@@ -91,3 +91,71 @@ All colours are semantic `NSColor`s, so light/dark mode resolve at draw time and
 ## Out of scope
 
 Editing, preferences, custom windows/toolbar, remote-image caching, per-language grammars, TextKit 2, HTML rendering, math, footnotes styling beyond plain text, printing.
+
+---
+
+## Revision 2 (2026-09-15): WKWebView engine
+
+After using the TextKit build on real documents the user rejected it (tables did not reflow with the
+window, bare URLs and table-of-contents anchors were not links, no diagrams, rendering visibly worse
+than GitHub). The engine was replaced; everything outside the rendering box is unchanged.
+
+- **Engine:** `WKWebView` hosting a bundled page — `markdown-it` 14.1 (GFM + `linkify`, own rules for
+  task lists and GitHub-style heading ids), `highlight.js` 11.11 (common languages),
+  `mermaid` 11.12 (injected lazily only when the document has a ```` ```mermaid ```` fence),
+  `github-markdown-css` 5.8 (light/dark via `prefers-color-scheme`). All vendored under
+  `MarkdownPreview/Resources/vendor`; no network needed. `swift-markdown` dependency removed.
+- **Page lifecycle:** the shell (`viewer.html` + inlined CSS/JS) is written once per process to a temp
+  file and loaded with `loadFileURL(_:allowingReadAccessTo: "/")` so images next to the document load;
+  a `<base href>` is set per document. Re-renders call `render(text, base)` in JS and replace
+  `#content` in place, so live reload keeps the scroll position.
+- **Security:** CSP with a per-process script nonce — HTML embedded in a Markdown file cannot run
+  scripts or inline handlers; only images/fonts may be fetched.
+- **Find:** a native AppKit find bar (`FindBar`: NSSearchField, ‹ › segmented control, Done; small controls
+  like NSTextView's) stacked above the web view in `ViewerView`. Edit ▸ Find (⌘F / ⌘G / ⇧⌘G) targets the
+  `ViewerView` in the key window. The page only searches and paints matches (`findSet/findNext/findPrevious/
+  findClear` using the CSS Custom Highlight API), returning "3 of 12" for the bar. Both the bar and the web
+  view own private `UndoManager`s so nothing marks the document "Edited".
+- **Raw view:** a toolbar toggle (`doc.plaintext`) switches the page between rendered preview and the raw
+  Markdown source (`setMode`).
+- **Links:** in-page `#anchors` scroll via JS; `.md`/`.markdown` file links open in the app; anything
+  else goes to `NSWorkspace`.
+- **Layout:** `.markdown-body` centred, max-width 920 px, reflows with the window.
+- **Files:** `MarkdownPreviewApp.swift`, `Document.swift`, `ContentView.swift` (ContentView,
+  `MarkdownWebView`, `ViewerView`, `FindBar`, `ViewerWebView`, `Page`), `Resources/`. `MarkdownRenderer.swift` deleted.
+- **Tests:** `ViewerWebViewTests` render through the real page and assert on the DOM; `FileWatcherTests` unchanged.
+- **Cost:** one extra WebContent process (~140 MB on an 86 KB, 428-row document); window still appears in ~0.4 s.
+
+## Revision 3 (2026-09-15): mdview, Quick Look, icon
+
+- App renamed **mdview** (product, module, bundle id `com.hungpv.mdview`, targets `mdview`, `mdviewTests`, `mdviewQuickLook`).
+- Title bar: `.windowToolbarStyle(.unifiedCompact)` — standard-height title bar like TextEdit, with the
+  Raw/Preview toolbar toggle inline.
+- Find bar is native AppKit (see Revision 2 note); the search field stretches across the bar.
+- **Quick Look Preview Extension** (`mdviewQuickLook`, `com.apple.quicklook.preview`, content type
+  `net.daringfireball.markdown`): a `QLPreviewingController` that hosts `ViewerWebView` and calls the
+  completion handler after the page has rendered. Sandboxed with `files.user-selected.read-only` and
+  `network.client` — the latter is required for WKWebView's processes to run inside a sandbox at all.
+  Images next to the file are not readable from the sandbox, so Quick Look shows their alt text.
+- `Viewer.swift` (ViewerWebView + Page) and `Resources/` are compiled into both the app and the extension;
+  `Page` locates resources with `Bundle(for: ViewerWebView.self)`.
+- App icon generated programmatically (blue squircle, Markdown "M↓" mark) into `Assets.xcassets/AppIcon`.
+
+## Revision 4 (2026-09-15): Preview-style sidebar
+
+- `ContentView` is a `NavigationSplitView`: a system sidebar lists the document outline (`[Heading]`
+  returned by the page's `render()` — id/level/text computed with the same slug algorithm as the heading
+  anchors), indented per level; selecting an entry calls `scrollToHeading(id)`. In raw mode heading
+  lines are wrapped in `<span id>` so the sidebar keeps working. Toolbar style `.unified` (like Preview.app).
+
+## Revision 5 (2026-09-15): Preview-style toolbar
+
+- Toolbar groups (glass pills on macOS 26 via `ToolbarSpacer`): zoom out / actual size / zoom in
+  (`WKWebView.pageZoom`, also View menu ⌘0 ⌘+ ⌘−), Raw toggle, find results ("3 of 57" ▲▼, shown while a
+  query is active), Info (popover: name, location, size, modified, words/characters/lines/headings) and
+  Share (`ShareLink`), plus the system search field (`.searchable`, `.searchFocused` for ⌘F).
+- The AppKit find bar was removed; the page still owns matching/highlighting. Menu and toolbar actions
+  reach the key window's `ViewerView` (`inKeyWindow()`), which forwards to the page and reports status
+  back to SwiftUI. Deployment target raised to macOS 15 for `.searchFocused`.
+- The page scrolls beneath the toolbar (`ignoresSafeArea`); `ViewerView.layout()` measures the chrome from
+  `window.contentLayoutRect` and the page pads its content by `--top-inset` (divided by the zoom factor).
