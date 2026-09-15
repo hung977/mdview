@@ -105,6 +105,13 @@ struct Visitor: MarkupVisitor {
         return result
     }
 
+    /// Invisible paragraph that separates a block (code, quote, table, rule) from what follows.
+    /// NSTextBlock margins are painted with the block background, so spacing lives outside the block.
+    func spacer(_ height: CGFloat = Style.spacing) -> NSAttributedString {
+        let style = paragraphStyle(spacing: height - 1, lineHeightMultiple: 1)
+        return paragraph(NSAttributedString(string: "", attributes: [.font: NSFont.systemFont(ofSize: 1)]), style: style)
+    }
+
     mutating func withFont(_ newFont: NSFont, _ body: (inout Visitor) -> NSAttributedString) -> NSAttributedString {
         let saved = font
         font = newFont
@@ -178,7 +185,7 @@ struct Visitor: MarkupVisitor {
     private func checkboxMarker(checked: Bool) -> NSAttributedString {
         let name = checked ? "checkmark.square.fill" : "square"
         let configuration = NSImage.SymbolConfiguration(pointSize: font.pointSize, weight: .regular)
-            .applying(.init(paletteColors: [checked ? .controlAccentColor : .secondaryLabelColor]))
+            .applying(.init(paletteColors: checked ? [.white, .controlAccentColor] : [.secondaryLabelColor]))
         let attachment = NSTextAttachment()
         if let image = NSImage(systemSymbolName: name, accessibilityDescription: checked ? "checked" : "unchecked")?
             .withSymbolConfiguration(configuration) {
@@ -195,30 +202,36 @@ struct Visitor: MarkupVisitor {
 
     mutating func visitBlockQuote(_ blockQuote: BlockQuote) -> NSAttributedString {
         let block = NSTextBlock()
+        block.setValue(100, type: .percentageValueType, for: .width)
         block.setWidth(3, type: .absoluteValueType, for: .border, edge: .minX)
         block.setBorderColor(.separatorColor)
         block.setWidth(12, type: .absoluteValueType, for: .padding, edge: .minX)
-        block.setWidth(Style.spacing, type: .absoluteValueType, for: .margin, edge: .maxY)
+        block.setWidth(4, type: .absoluteValueType, for: .padding, edge: .minY)
+        block.setWidth(4, type: .absoluteValueType, for: .padding, edge: .maxY)
         blocks.append(block)
         let savedColor = color
         color = .secondaryLabelColor
-        defer { blocks.removeLast(); color = savedColor }
         let content = NSMutableAttributedString(attributedString: visitChildren(blockQuote))
-        setSpacingAfter(content, 0)   // the block margin provides the gap
+        setSpacingAfter(content, 0)
+        blocks.removeLast()
+        color = savedColor
+        content.append(spacer())
         return content
     }
 
     mutating func visitThematicBreak(_ thematicBreak: ThematicBreak) -> NSAttributedString {
         let block = NSTextBlock()
+        block.setValue(100, type: .percentageValueType, for: .width)
         block.backgroundColor = .separatorColor
         block.setValue(1, type: .absoluteValueType, for: .height)
         block.setValue(1, type: .absoluteValueType, for: .maximumHeight)
-        block.setWidth(Style.spacing, type: .absoluteValueType, for: .margin, edge: .minY)
-        block.setWidth(Style.spacing, type: .absoluteValueType, for: .margin, edge: .maxY)
+        let result = NSMutableAttributedString(attributedString: spacer(6))
         blocks.append(block)
-        defer { blocks.removeLast() }
         let hairline = NSAttributedString(string: "\u{200B}", attributes: [.font: NSFont.systemFont(ofSize: 1)])
-        return paragraph(hairline, style: paragraphStyle(spacing: 0, lineHeightMultiple: 1))
+        result.append(paragraph(hairline, style: paragraphStyle(spacing: 0, lineHeightMultiple: 1)))
+        blocks.removeLast()
+        result.append(spacer())
+        return result
     }
 
     // MARK: Code
@@ -233,11 +246,10 @@ struct Visitor: MarkupVisitor {
 
     mutating func visitCodeBlock(_ codeBlock: CodeBlock) -> NSAttributedString {
         let block = NSTextBlock()
+        block.setValue(100, type: .percentageValueType, for: .width)
         block.backgroundColor = Style.codeBackground
         block.setWidth(12, type: .absoluteValueType, for: .padding)
-        block.setWidth(Style.spacing, type: .absoluteValueType, for: .margin, edge: .maxY)
         blocks.append(block)
-        defer { blocks.removeLast() }
 
         var code = codeBlock.code
         if code.hasSuffix("\n") { code.removeLast() }
@@ -248,6 +260,8 @@ struct Visitor: MarkupVisitor {
         CodeHighlighter.highlight(text, language: codeBlock.language)
         text.addAttribute(.paragraphStyle, value: paragraphStyle(spacing: 0, lineHeightMultiple: 1.15),
                           range: NSRange(location: 0, length: text.length))
+        blocks.removeLast()
+        text.append(spacer())
         return text
     }
 
@@ -265,7 +279,6 @@ struct Visitor: MarkupVisitor {
         let textTable = NSTextTable()
         textTable.numberOfColumns = columns
         textTable.collapsesBorders = true
-        textTable.setWidth(Style.spacing, type: .absoluteValueType, for: .margin, edge: .maxY)
         let (percentages, naturalWidth) = columnPercentages(rows, columns: columns)
         textTable.setValue(min(100, naturalWidth / Style.maxWidth * 100), type: .percentageValueType, for: .width)
 
@@ -299,6 +312,7 @@ struct Visitor: MarkupVisitor {
                 blocks.removeLast()
             }
         }
+        result.append(spacer())
         return result
     }
 
@@ -482,8 +496,11 @@ final class ImageAttachment: NSTextAttachment {
 
     private func didLoad(_ loaded: NSImage?) {
         image = loaded
-        guard let storage = layoutManager?.textStorage, characterIndex < storage.length else { return }
-        storage.edited(.editedAttributes, range: NSRange(location: characterIndex, length: 1), changeInLength: 0)
+        guard let layoutManager, characterIndex < (layoutManager.textStorage?.length ?? 0) else { return }
+        let range = NSRange(location: characterIndex, length: 1)
+        layoutManager.invalidateGlyphs(forCharacterRange: range, changeInLength: 0, actualCharacterRange: nil)
+        layoutManager.invalidateLayout(forCharacterRange: range, actualCharacterRange: nil)
+        layoutManager.invalidateDisplay(forCharacterRange: range)
     }
 
     override func attachmentBounds(for textContainer: NSTextContainer?, proposedLineFragment lineFrag: CGRect,

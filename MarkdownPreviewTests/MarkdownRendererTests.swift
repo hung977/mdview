@@ -106,7 +106,7 @@ final class MarkdownRendererTests: XCTestCase {
         let i = location(of: "let", in: s)
         XCTAssertTrue(font(s, at: i).fontDescriptor.symbolicTraits.contains(.monoSpace))
         XCTAssertEqual(paragraphStyle(s, at: i).textBlocks.count, 1)
-        XCTAssertEqual(s.string, "let x = 1\n")
+        XCTAssertTrue(s.string.hasPrefix("let x = 1\n"))
     }
 
     func testHighlighterColoursCommentsStringsNumbersKeywords() {

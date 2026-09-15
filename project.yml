@@ -27,7 +27,7 @@ targets:
     platform: macOS
     sources:
       - path: MarkdownPreview
-        excludes: ["Sample.md", "sample.png"]
+        excludes: ["Sample.md", "Sample-tail.md", "sample.png", "wide.png"]
     dependencies:
       - package: Markdown
     settings:
