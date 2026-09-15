@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import UniformTypeIdentifiers
 
 struct ContentView: View {
     let document: MarkdownDocument
@@ -18,6 +19,17 @@ struct ContentView: View {
             .onAppear {
                 guard watcher == nil, let fileURL else { return }
                 watcher = FileWatcher(url: fileURL) { reload(from: fileURL) }
+            }
+            .onDrop(of: [.fileURL], isTargeted: nil) { providers in
+                for provider in providers {
+                    _ = provider.loadObject(ofClass: URL.self) { url, _ in
+                        guard let url, ["md", "markdown"].contains(url.pathExtension.lowercased()) else { return }
+                        DispatchQueue.main.async {
+                            NSDocumentController.shared.openDocument(withContentsOf: url, display: true) { _, _, _ in }
+                        }
+                    }
+                }
+                return true
             }
     }
 
