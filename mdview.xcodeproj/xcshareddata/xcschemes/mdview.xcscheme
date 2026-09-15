@@ -15,10 +15,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "888CF13BC68B3DB2C4D48C65"
-               BuildableName = "MarkdownPreview.app"
-               BlueprintName = "MarkdownPreview"
-               ReferencedContainer = "container:MarkdownPreview.xcodeproj">
+               BlueprintIdentifier = "9F50E1CE7B626A939626D2B8"
+               BuildableName = "mdview.app"
+               BlueprintName = "mdview"
+               ReferencedContainer = "container:mdview.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -29,10 +29,10 @@
             buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "1E46881FCB4980CA2E8CEFB6"
-               BuildableName = "MarkdownPreviewTests.xctest"
-               BlueprintName = "MarkdownPreviewTests"
-               ReferencedContainer = "container:MarkdownPreview.xcodeproj">
+               BlueprintIdentifier = "38C9E10636CC61ECC44F08C0"
+               BuildableName = "mdviewTests.xctest"
+               BlueprintName = "mdviewTests"
+               ReferencedContainer = "container:mdview.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -46,10 +46,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "888CF13BC68B3DB2C4D48C65"
-            BuildableName = "MarkdownPreview.app"
-            BlueprintName = "MarkdownPreview"
-            ReferencedContainer = "container:MarkdownPreview.xcodeproj">
+            BlueprintIdentifier = "9F50E1CE7B626A939626D2B8"
+            BuildableName = "mdview.app"
+            BlueprintName = "mdview"
+            ReferencedContainer = "container:mdview.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
@@ -58,10 +58,10 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "1E46881FCB4980CA2E8CEFB6"
-               BuildableName = "MarkdownPreviewTests.xctest"
-               BlueprintName = "MarkdownPreviewTests"
-               ReferencedContainer = "container:MarkdownPreview.xcodeproj">
+               BlueprintIdentifier = "38C9E10636CC61ECC44F08C0"
+               BuildableName = "mdviewTests.xctest"
+               BlueprintName = "mdviewTests"
+               ReferencedContainer = "container:mdview.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -82,10 +82,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "888CF13BC68B3DB2C4D48C65"
-            BuildableName = "MarkdownPreview.app"
-            BlueprintName = "MarkdownPreview"
-            ReferencedContainer = "container:MarkdownPreview.xcodeproj">
+            BlueprintIdentifier = "9F50E1CE7B626A939626D2B8"
+            BuildableName = "mdview.app"
+            BlueprintName = "mdview"
+            ReferencedContainer = "container:mdview.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
@@ -101,10 +101,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "888CF13BC68B3DB2C4D48C65"
-            BuildableName = "MarkdownPreview.app"
-            BlueprintName = "MarkdownPreview"
-            ReferencedContainer = "container:MarkdownPreview.xcodeproj">
+            BlueprintIdentifier = "9F50E1CE7B626A939626D2B8"
+            BuildableName = "mdview.app"
+            BlueprintName = "mdview"
+            ReferencedContainer = "container:mdview.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

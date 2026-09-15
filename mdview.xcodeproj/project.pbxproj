@@ -7,201 +7,205 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0EC6164F2BD32A9E667217BD /* ViewerWebViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92F5066014923F2EE89C021D /* ViewerWebViewTests.swift */; };
-		3126CABEBF92E42BEC965235 /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = 43BF42893E2BEA5F39FD4C1F /* Resources */; };
-		5B525EB6B227AF2D4134E0B7 /* MarkdownPreviewApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E66AA3A801406C7769500BB0 /* MarkdownPreviewApp.swift */; };
-		821EC30ED9E3F983AC6EA5EA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D315D0F800852696238D5FC8 /* ContentView.swift */; };
-		9C04FB1B8D955066967427D6 /* FileWatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B8181E9082DB6275192D1A /* FileWatcherTests.swift */; };
-		CA4E604CF46EA056186AE168 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D52EF8DD62C052E6CAF7A21 /* Document.swift */; };
-		D3DB60B42DEDF64C61168495 /* FindBarTypingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F8742D589CFB883229BC610 /* FindBarTypingTests.swift */; };
+		1F04A55F5CC846321BF4D440 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = E012133B7F6566C690801B9E /* Document.swift */; };
+		1FEDA905857DCE0AF7DFE541 /* FileWatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD2137190663FA19877AB4A /* FileWatcherTests.swift */; };
+		2AF116D7362DA2A8018001B5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 992A40E4669BC58BB0017F91 /* ContentView.swift */; };
+		50858ACC99E2D6A9CDDA76B4 /* MDViewApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0E0927D588F55E8E9E694 /* MDViewApp.swift */; };
+		62DA63FA25D73D2F0EDA9662 /* ViewerWebViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D93B1DF770ED35FF4B9B467 /* ViewerWebViewTests.swift */; };
+		931E683E8678A674C25E3DC4 /* Viewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B179FD75857C3580073C08B /* Viewer.swift */; };
+		B7E9890C7E32486EDC1EDF95 /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = 4F52B7FDE23C110114F049F3 /* Resources */; };
+		BC4D81AB58B039C65B2C75C0 /* FindBarTypingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16461561D0C3633D2CD82287 /* FindBarTypingTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		B7D7BC2764DFBAEBB8B006D4 /* PBXContainerItemProxy */ = {
+		57B8A0BFF4A6D2827F4C5578 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = B55EE093A36A763C3395AE1A /* Project object */;
+			containerPortal = 16F80D69FDF31DA953B25AC6 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 888CF13BC68B3DB2C4D48C65;
-			remoteInfo = MarkdownPreview;
+			remoteGlobalIDString = 9F50E1CE7B626A939626D2B8;
+			remoteInfo = mdview;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		2F8742D589CFB883229BC610 /* FindBarTypingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindBarTypingTests.swift; sourceTree = "<group>"; };
-		43BF42893E2BEA5F39FD4C1F /* Resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Resources; path = MarkdownPreview/Resources; sourceTree = SOURCE_ROOT; };
-		4D52EF8DD62C052E6CAF7A21 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
-		53AA36B22B3BAEE1EF87FE85 /* MarkdownPreviewTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MarkdownPreviewTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		92F5066014923F2EE89C021D /* ViewerWebViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewerWebViewTests.swift; sourceTree = "<group>"; };
-		C04FE5DDB7D28E26AC478A2F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		D315D0F800852696238D5FC8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		E66AA3A801406C7769500BB0 /* MarkdownPreviewApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownPreviewApp.swift; sourceTree = "<group>"; };
-		EF01C261A670CA7E6635B4FC /* MarkdownPreview.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MarkdownPreview.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		F2B8181E9082DB6275192D1A /* FileWatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWatcherTests.swift; sourceTree = "<group>"; };
+		16461561D0C3633D2CD82287 /* FindBarTypingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindBarTypingTests.swift; sourceTree = "<group>"; };
+		2B179FD75857C3580073C08B /* Viewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Viewer.swift; sourceTree = "<group>"; };
+		2D93B1DF770ED35FF4B9B467 /* ViewerWebViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewerWebViewTests.swift; sourceTree = "<group>"; };
+		3666D30AA351AC44487DD5A4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		4DD0E0927D588F55E8E9E694 /* MDViewApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDViewApp.swift; sourceTree = "<group>"; };
+		4F52B7FDE23C110114F049F3 /* Resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Resources; path = mdview/Resources; sourceTree = SOURCE_ROOT; };
+		86B6299154C1BA633138762C /* mdviewTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = mdviewTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		992A40E4669BC58BB0017F91 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		ACD2137190663FA19877AB4A /* FileWatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWatcherTests.swift; sourceTree = "<group>"; };
+		DE5D57C3B42A29D67FA92A43 /* mdview.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mdview.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E012133B7F6566C690801B9E /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
-		23F84EA2027E3462E569C601 /* MarkdownPreviewTests */ = {
+		6D1E67B10ED428EB5D49EFA0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F2B8181E9082DB6275192D1A /* FileWatcherTests.swift */,
-				2F8742D589CFB883229BC610 /* FindBarTypingTests.swift */,
-				92F5066014923F2EE89C021D /* ViewerWebViewTests.swift */,
-			);
-			path = MarkdownPreviewTests;
-			sourceTree = "<group>";
-		};
-		5EDB011D5C500C2FBADFFA6D /* MarkdownPreview */ = {
-			isa = PBXGroup;
-			children = (
-				D315D0F800852696238D5FC8 /* ContentView.swift */,
-				4D52EF8DD62C052E6CAF7A21 /* Document.swift */,
-				C04FE5DDB7D28E26AC478A2F /* Info.plist */,
-				E66AA3A801406C7769500BB0 /* MarkdownPreviewApp.swift */,
-				43BF42893E2BEA5F39FD4C1F /* Resources */,
-			);
-			path = MarkdownPreview;
-			sourceTree = "<group>";
-		};
-		6588DC80A5B6A6E341F5FB93 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				EF01C261A670CA7E6635B4FC /* MarkdownPreview.app */,
-				53AA36B22B3BAEE1EF87FE85 /* MarkdownPreviewTests.xctest */,
+				DE5D57C3B42A29D67FA92A43 /* mdview.app */,
+				86B6299154C1BA633138762C /* mdviewTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		C0F59247730347C0D1E7382A = {
+		A6C222E19B72CE98E8413EAA /* mdviewTests */ = {
 			isa = PBXGroup;
 			children = (
-				5EDB011D5C500C2FBADFFA6D /* MarkdownPreview */,
-				23F84EA2027E3462E569C601 /* MarkdownPreviewTests */,
-				6588DC80A5B6A6E341F5FB93 /* Products */,
+				ACD2137190663FA19877AB4A /* FileWatcherTests.swift */,
+				16461561D0C3633D2CD82287 /* FindBarTypingTests.swift */,
+				2D93B1DF770ED35FF4B9B467 /* ViewerWebViewTests.swift */,
+			);
+			path = mdviewTests;
+			sourceTree = "<group>";
+		};
+		E802E4652A78958FBD881A00 /* mdview */ = {
+			isa = PBXGroup;
+			children = (
+				992A40E4669BC58BB0017F91 /* ContentView.swift */,
+				E012133B7F6566C690801B9E /* Document.swift */,
+				3666D30AA351AC44487DD5A4 /* Info.plist */,
+				4DD0E0927D588F55E8E9E694 /* MDViewApp.swift */,
+				4F52B7FDE23C110114F049F3 /* Resources */,
+				2B179FD75857C3580073C08B /* Viewer.swift */,
+			);
+			path = mdview;
+			sourceTree = "<group>";
+		};
+		FDF14CF892688491588EE2A7 = {
+			isa = PBXGroup;
+			children = (
+				E802E4652A78958FBD881A00 /* mdview */,
+				A6C222E19B72CE98E8413EAA /* mdviewTests */,
+				6D1E67B10ED428EB5D49EFA0 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1E46881FCB4980CA2E8CEFB6 /* MarkdownPreviewTests */ = {
+		38C9E10636CC61ECC44F08C0 /* mdviewTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1CBDD5956C31DE08BC6B047C /* Build configuration list for PBXNativeTarget "MarkdownPreviewTests" */;
+			buildConfigurationList = 06FAB2A57253C2114942DD84 /* Build configuration list for PBXNativeTarget "mdviewTests" */;
 			buildPhases = (
-				22FB1F94D0386D9F69C4DCF3 /* Sources */,
+				D816CE219ACE0A19BEF693E4 /* Sources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				FE555CE951E067A35BB91BB9 /* PBXTargetDependency */,
+				E77F6A7A50052D2E14C45BBE /* PBXTargetDependency */,
 			);
-			name = MarkdownPreviewTests;
+			name = mdviewTests;
 			packageProductDependencies = (
 			);
-			productName = MarkdownPreviewTests;
-			productReference = 53AA36B22B3BAEE1EF87FE85 /* MarkdownPreviewTests.xctest */;
+			productName = mdviewTests;
+			productReference = 86B6299154C1BA633138762C /* mdviewTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		888CF13BC68B3DB2C4D48C65 /* MarkdownPreview */ = {
+		9F50E1CE7B626A939626D2B8 /* mdview */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D0523671E48994611970C679 /* Build configuration list for PBXNativeTarget "MarkdownPreview" */;
+			buildConfigurationList = 25EDADC04466FC6D8B8AAACD /* Build configuration list for PBXNativeTarget "mdview" */;
 			buildPhases = (
-				CB4C60909DCC9F68968744E6 /* Sources */,
-				F28DAEEA34396B14F9D20BF2 /* Resources */,
+				41D94C34811AD559D40300DC /* Sources */,
+				AF6473C3B527A860AF093B47 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = MarkdownPreview;
+			name = mdview;
 			packageProductDependencies = (
 			);
-			productName = MarkdownPreview;
-			productReference = EF01C261A670CA7E6635B4FC /* MarkdownPreview.app */;
+			productName = mdview;
+			productReference = DE5D57C3B42A29D67FA92A43 /* mdview.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		B55EE093A36A763C3395AE1A /* Project object */ = {
+		16F80D69FDF31DA953B25AC6 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
-					1E46881FCB4980CA2E8CEFB6 = {
+					38C9E10636CC61ECC44F08C0 = {
 						DevelopmentTeam = "";
 						ProvisioningStyle = Manual;
 					};
-					888CF13BC68B3DB2C4D48C65 = {
+					9F50E1CE7B626A939626D2B8 = {
 						DevelopmentTeam = "";
 						ProvisioningStyle = Manual;
 					};
 				};
 			};
-			buildConfigurationList = 4650FF34CF8B3C6D0C9FAACF /* Build configuration list for PBXProject "MarkdownPreview" */;
+			buildConfigurationList = F3DAF7FC4C9B8A5F8F25AFAB /* Build configuration list for PBXProject "mdview" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
 				en,
 			);
-			mainGroup = C0F59247730347C0D1E7382A;
+			mainGroup = FDF14CF892688491588EE2A7;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 6588DC80A5B6A6E341F5FB93 /* Products */;
+			productRefGroup = 6D1E67B10ED428EB5D49EFA0 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				888CF13BC68B3DB2C4D48C65 /* MarkdownPreview */,
-				1E46881FCB4980CA2E8CEFB6 /* MarkdownPreviewTests */,
+				9F50E1CE7B626A939626D2B8 /* mdview */,
+				38C9E10636CC61ECC44F08C0 /* mdviewTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		F28DAEEA34396B14F9D20BF2 /* Resources */ = {
+		AF6473C3B527A860AF093B47 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3126CABEBF92E42BEC965235 /* Resources in Resources */,
+				B7E9890C7E32486EDC1EDF95 /* Resources in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		22FB1F94D0386D9F69C4DCF3 /* Sources */ = {
+		41D94C34811AD559D40300DC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9C04FB1B8D955066967427D6 /* FileWatcherTests.swift in Sources */,
-				D3DB60B42DEDF64C61168495 /* FindBarTypingTests.swift in Sources */,
-				0EC6164F2BD32A9E667217BD /* ViewerWebViewTests.swift in Sources */,
+				2AF116D7362DA2A8018001B5 /* ContentView.swift in Sources */,
+				1F04A55F5CC846321BF4D440 /* Document.swift in Sources */,
+				50858ACC99E2D6A9CDDA76B4 /* MDViewApp.swift in Sources */,
+				931E683E8678A674C25E3DC4 /* Viewer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		CB4C60909DCC9F68968744E6 /* Sources */ = {
+		D816CE219ACE0A19BEF693E4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				821EC30ED9E3F983AC6EA5EA /* ContentView.swift in Sources */,
-				CA4E604CF46EA056186AE168 /* Document.swift in Sources */,
-				5B525EB6B227AF2D4134E0B7 /* MarkdownPreviewApp.swift in Sources */,
+				1FEDA905857DCE0AF7DFE541 /* FileWatcherTests.swift in Sources */,
+				BC4D81AB58B039C65B2C75C0 /* FindBarTypingTests.swift in Sources */,
+				62DA63FA25D73D2F0EDA9662 /* ViewerWebViewTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		FE555CE951E067A35BB91BB9 /* PBXTargetDependency */ = {
+		E77F6A7A50052D2E14C45BBE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 888CF13BC68B3DB2C4D48C65 /* MarkdownPreview */;
-			targetProxy = B7D7BC2764DFBAEBB8B006D4 /* PBXContainerItemProxy */;
+			target = 9F50E1CE7B626A939626D2B8 /* mdview */;
+			targetProxy = 57B8A0BFF4A6D2827F4C5578 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		085319548E1256E7694B0FBB /* Debug */ = {
+		1CA3739DC9C05D486207E083 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -269,26 +273,7 @@
 			};
 			name = Debug;
 		};
-		72218CE41FE6AE7BB5FB77BA /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				COMBINE_HIDPI_IMAGES = YES;
-				ENABLE_PREVIEWS = NO;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = MarkdownPreview/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.hungpv.MarkdownPreview;
-				PRODUCT_MODULE_NAME = MarkdownPreview;
-				PRODUCT_NAME = "Markdown Preview";
-				SDKROOT = macosx;
-			};
-			name = Release;
-		};
-		72CB00DF44D01E0947825B74 /* Debug */ = {
+		29D53652A5D241C8EA7D4F2A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -299,13 +284,13 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.hungpv.MarkdownPreviewTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hungpv.mdviewTests;
 				SDKROOT = macosx;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Markdown Preview.app/Contents/MacOS/Markdown Preview";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/mdview.app/Contents/MacOS/mdview";
 			};
-			name = Debug;
+			name = Release;
 		};
-		7DC4E7337989CEFB05FCF42E /* Release */ = {
+		418E09C0B2FE72CA40F3B080 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -366,7 +351,7 @@
 			};
 			name = Release;
 		};
-		D6545054ED07054643ACE61E /* Release */ = {
+		4904F41FA72701EA30F2E8DF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -377,62 +362,81 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.hungpv.MarkdownPreviewTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hungpv.mdviewTests;
 				SDKROOT = macosx;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Markdown Preview.app/Contents/MacOS/Markdown Preview";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/mdview.app/Contents/MacOS/mdview";
 			};
-			name = Release;
+			name = Debug;
 		};
-		E5A71489FAE17784FC527831 /* Debug */ = {
+		8FFC7CBA533C3D09DE609F47 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_PREVIEWS = NO;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = MarkdownPreview/Info.plist;
+				INFOPLIST_FILE = mdview/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.hungpv.MarkdownPreview;
-				PRODUCT_MODULE_NAME = MarkdownPreview;
-				PRODUCT_NAME = "Markdown Preview";
+				PRODUCT_BUNDLE_IDENTIFIER = com.hungpv.mdview;
+				PRODUCT_MODULE_NAME = mdview;
+				PRODUCT_NAME = mdview;
 				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
+		CF5EF17E31323C537CE9EDD0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_PREVIEWS = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = mdview/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.hungpv.mdview;
+				PRODUCT_MODULE_NAME = mdview;
+				PRODUCT_NAME = mdview;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1CBDD5956C31DE08BC6B047C /* Build configuration list for PBXNativeTarget "MarkdownPreviewTests" */ = {
+		06FAB2A57253C2114942DD84 /* Build configuration list for PBXNativeTarget "mdviewTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				72CB00DF44D01E0947825B74 /* Debug */,
-				D6545054ED07054643ACE61E /* Release */,
+				4904F41FA72701EA30F2E8DF /* Debug */,
+				29D53652A5D241C8EA7D4F2A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		4650FF34CF8B3C6D0C9FAACF /* Build configuration list for PBXProject "MarkdownPreview" */ = {
+		25EDADC04466FC6D8B8AAACD /* Build configuration list for PBXNativeTarget "mdview" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				085319548E1256E7694B0FBB /* Debug */,
-				7DC4E7337989CEFB05FCF42E /* Release */,
+				8FFC7CBA533C3D09DE609F47 /* Debug */,
+				CF5EF17E31323C537CE9EDD0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		D0523671E48994611970C679 /* Build configuration list for PBXNativeTarget "MarkdownPreview" */ = {
+		F3DAF7FC4C9B8A5F8F25AFAB /* Build configuration list for PBXProject "mdview" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E5A71489FAE17784FC527831 /* Debug */,
-				72218CE41FE6AE7BB5FB77BA /* Release */,
+				1CA3739DC9C05D486207E083 /* Debug */,
+				418E09C0B2FE72CA40F3B080 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = B55EE093A36A763C3395AE1A /* Project object */;
+	rootObject = 16F80D69FDF31DA953B25AC6 /* Project object */;
 }

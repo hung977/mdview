@@ -1,4 +1,4 @@
-name: MarkdownPreview
+name: mdview
 options:
   bundleIdPrefix: com.hungpv
   deploymentTarget:
@@ -17,27 +17,27 @@ settings:
     SWIFT_TREAT_WARNINGS_AS_ERRORS: NO
 
 targets:
-  MarkdownPreview:
+  mdview:
     type: application
     platform: macOS
     sources:
-      - path: MarkdownPreview
+      - path: mdview
         excludes: ["Sample.md", "sample.png", "wide.png", "Resources"]
-      - path: MarkdownPreview/Resources
+      - path: mdview/Resources
         type: folder
         buildPhase: resources
     settings:
       base:
-        PRODUCT_NAME: Markdown Preview
-        PRODUCT_MODULE_NAME: MarkdownPreview
-        PRODUCT_BUNDLE_IDENTIFIER: com.hungpv.MarkdownPreview
+        PRODUCT_NAME: mdview
+        PRODUCT_MODULE_NAME: mdview
+        PRODUCT_BUNDLE_IDENTIFIER: com.hungpv.mdview
         GENERATE_INFOPLIST_FILE: NO
         ENABLE_PREVIEWS: NO
     info:
-      path: MarkdownPreview/Info.plist
+      path: mdview/Info.plist
       properties:
-        CFBundleDisplayName: Markdown Preview
-        CFBundleName: Markdown Preview
+        CFBundleDisplayName: mdview
+        CFBundleName: mdview
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "1"
         LSMinimumSystemVersion: "14.0"
@@ -60,26 +60,26 @@ targets:
               public.filename-extension: [md, markdown]
               public.mime-type: [text/markdown]
 
-  MarkdownPreviewTests:
+  mdviewTests:
     type: bundle.unit-test
     platform: macOS
-    sources: [MarkdownPreviewTests]
+    sources: [mdviewTests]
     dependencies:
-      - target: MarkdownPreview
+      - target: mdview
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Markdown Preview.app/Contents/MacOS/Markdown Preview"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/mdview.app/Contents/MacOS/mdview"
         BUNDLE_LOADER: "$(TEST_HOST)"
 
 schemes:
-  MarkdownPreview:
+  mdview:
     build:
       targets:
-        MarkdownPreview: all
-        MarkdownPreviewTests: [test]
+        mdview: all
+        mdviewTests: [test]
     run:
       config: Debug
     test:
       config: Debug
-      targets: [MarkdownPreviewTests]
+      targets: [mdviewTests]

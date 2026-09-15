@@ -1,6 +1,6 @@
 import XCTest
 import SwiftUI
-@testable import MarkdownPreview
+@testable import mdview
 
 /// ⌘F opens a native find bar; typing there must reach the search field and never the document's undo manager.
 final class FindBarTypingTests: XCTestCase {
@@ -12,7 +12,7 @@ final class FindBarTypingTests: XCTestCase {
                               styleMask: [.titled], backing: .buffered, defer: false)
         let viewer: ViewerView
         if hosting {
-            window.contentView = NSHostingView(rootView: MarkdownWebView(text: "hello world", baseURL: nil, showRaw: false))
+            window.contentView = NSHostingView(rootView: MarkdownWebView(text: "hello world", baseURL: nil))
             window.makeKeyAndOrderFront(nil)
             RunLoop.main.run(until: Date().addingTimeInterval(0.3))
             viewer = ViewerView.first(in: window.contentView!)!

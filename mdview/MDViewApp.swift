@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct MarkdownPreviewApp: App {
+struct MDViewApp: App {
     var body: some Scene {
         DocumentGroup(viewing: MarkdownDocument.self) { file in
             ContentView(document: file.document, fileURL: file.fileURL)

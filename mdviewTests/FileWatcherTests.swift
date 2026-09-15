@@ -1,5 +1,5 @@
 import XCTest
-@testable import MarkdownPreview
+@testable import mdview
 
 final class FileWatcherTests: XCTestCase {
     private var url: URL!

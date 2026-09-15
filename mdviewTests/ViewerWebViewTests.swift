@@ -1,6 +1,6 @@
 import XCTest
 import WebKit
-@testable import MarkdownPreview
+@testable import mdview
 
 /// Renders Markdown through the real viewer page and inspects the resulting DOM.
 final class ViewerWebViewTests: XCTestCase {
